@@ -60,6 +60,7 @@ localStorage.setItem('gameVipTime', expireMs);
   location.reload();
 }
 </script>
+
 <!doctype html>
 <html lang="zh-CN">
 <head>
@@ -93,7 +94,7 @@ body{display:block;background:#11175a}
 #game{width:100vw;height:100vh;height:100dvh;margin:0;border:0!important;border-radius:0!important;box-shadow:none!important}
 @media (orientation:landscape) and (max-height:600px){
   .modal{padding:6px 12px;align-items:center}
-  .card{width:min(720px,94vw);max-height:calc(100dvh - 12px);padding:10px 14px;border-radius:16px}
+  .card{width:min(560px,76vw);max-height:calc(100dvh - 18px);padding:8px 12px;border-radius:14px}
   .card h2{font-size:clamp(19px,5vh,26px);margin-bottom:2px}
   .tag{padding:2px 8px;font-size:11px}
   .prompt{margin:6px 0 3px;font-size:clamp(24px,8vh,32px)!important}
@@ -109,11 +110,25 @@ body{display:block;background:#11175a}
   .home-grid{margin:6px 0}.stars{font-size:22px}
   .hud{top:max(4px,env(safe-area-inset-top));gap:4px}.pill{padding:4px 7px!important;font-size:11px!important}
   .hp{width:min(26vw,160px)}.bar{height:11px}.tip{top:48px;padding:5px 9px;font-size:11px!important}
-  .music{top:45px;padding:4px 7px;font-size:11px}
+  .music{top:42px;padding:3px 6px;font-size:10px}
   .joy{left:10px;bottom:10px;width:112px;height:112px}.joy button{width:36px;height:36px;border-radius:10px;font-size:20px!important}
   .joy .u{left:38px}.joy .d{left:38px;top:76px}.joy .l{top:38px}.joy .r{left:76px;top:38px}
   .action{right:12px;bottom:13px;width:68px;height:68px;font-size:12px!important;border-width:3px!important}
   .jump{right:66px;bottom:88px;width:48px;height:48px;font-size:11px;border-width:3px}
+}
+.rotate-mask{display:none!important}
+@media (orientation:portrait){
+  .hud{top:max(6px,env(safe-area-inset-top));left:6px;right:6px;display:grid;grid-template-columns:1.35fr repeat(3,.7fr);gap:4px;z-index:5}
+  .hud .pill{padding:4px 5px!important;font-size:10px!important;border-width:2px!important;border-radius:10px;text-align:center;min-width:0}
+  .hud .pill:nth-child(n+5){display:none}.hp{width:auto}.bar{height:9px;border-width:1px}
+  .tip{display:none}.music{top:76px;right:7px;padding:4px 7px;font-size:10px;border-width:2px}
+  .joy{left:10px;bottom:max(12px,env(safe-area-inset-bottom));width:126px;height:126px;padding:6px;border:2px solid #9beeff;border-radius:28px;background:#15206099;box-shadow:0 7px 20px #070d36aa}
+  .joy button{width:38px;height:38px;border-radius:11px;font-size:20px!important}
+  .joy .u{left:44px;top:6px}.joy .d{left:44px;top:82px}.joy .l{left:6px;top:44px}.joy .r{left:82px;top:44px}
+  .action{right:12px;bottom:max(18px,env(safe-area-inset-bottom));width:72px;height:72px;font-size:12px!important;border-width:3px!important}
+  .jump{right:92px;bottom:28px;width:52px;height:52px;font-size:11px;border-width:3px}
+  .card{width:90vw;max-height:72dvh;padding:12px;border-radius:16px}
+  .card h2{font-size:21px}.prompt{font-size:27px!important;margin:7px 0 4px}.hint{font-size:12px}.letters{margin:7px 0}.letters button{width:39px;height:39px}.options{margin:8px 0}.options button,.primary,.secondary{min-height:40px;font-size:13px!important}
 }
 </style></head>
 <body><div class="rotate-mask" id="rotateMask"><div class="rotate-card"><div class="rotate-phone">📱</div><div class="rotate-title">请横屏开始</div><div class="rotate-tip">请打开手机自动旋转，再把手机横过来。</div><button class="rotate-start" id="rotateStart">我已横屏，刷新画面</button><div class="rotate-mini">微信里请点右上角“…”并选择在浏览器打开</div></div></div><div class="game-shell"><main id="game"><canvas id="c"></canvas><canvas id="heroCanvas"></canvas>
@@ -174,10 +189,10 @@ function levelTaskCount(level){let n=objects.filter(o=>o.k==='door'&&o.x>=level.
 function blockedByGate(oldX,newX){for(let i=0;i<LEVELS.length-1;i++){let wall=LEVELS[i].to;if(oldX<wall&&newX>=wall&&levelTaskCount(LEVELS[i])<LEVELS[i].need)return LEVELS[i]}return null}
 const heroCanvas=document.querySelector('#heroCanvas'),hctx=heroCanvas.getContext('2d');
 function isPortraitPhone(){return window.innerHeight>window.innerWidth&&Math.min(window.innerWidth,window.innerHeight)<900}
-function updateOrientationMask(){rotateMask.classList.toggle('show',isPortraitPhone())}
+function updateOrientationMask(){rotateMask.classList.remove('show')}
 function enterLandscapeGame(){resize()}
 function layoutForScreen(){let top=105,bottom=Math.max(122,H*.67-20),mapY=y=>top+Math.max(0,Math.min(1,(y-140)/315))*(bottom-top);objects.forEach(o=>{o._baseY??=o.y;o.y=o.lane==='ground'?bottom:mapY(o._baseY)});rocks.forEach(r=>{r._baseY??=r.y;r.y=mapY(r._baseY)});S.y=Math.max(top,Math.min(bottom,S.y))}
-function resize(){dpr=Math.min(devicePixelRatio||1,2);let cssW=game.clientWidth,cssH=game.clientHeight;sceneScale=cssW>cssH&&(cssH<650||cssW<1100)?.78:1;W=cssW/sceneScale;H=cssH/sceneScale;canvas.width=W*dpr;canvas.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);heroCanvas.width=W*dpr;heroCanvas.height=H*dpr;hctx.setTransform(dpr,0,0,dpr,0,0);layoutForScreen();updateOrientationMask()}
+function resize(){dpr=Math.min(devicePixelRatio||1,2);let cssW=game.clientWidth,cssH=game.clientHeight;sceneScale=cssW<=cssH?.66:((cssH<700||cssW<1200)?.68:.82);W=cssW/sceneScale;H=cssH/sceneScale;canvas.width=W*dpr;canvas.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);heroCanvas.width=W*dpr;heroCanvas.height=H*dpr;hctx.setTransform(dpr,0,0,dpr,0,0);layoutForScreen();updateOrientationMask()}
 addEventListener('resize',resize);
 addEventListener('orientationchange',()=>setTimeout(resize,180));
 document.querySelector('#rotateStart').addEventListener('click',enterLandscapeGame);
