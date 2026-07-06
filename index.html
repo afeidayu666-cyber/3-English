@@ -12,38 +12,25 @@ if(Number(vipExpire) < now){
   <div style="background:#17155c;color:#fff;padding:30px;text-align:center;height:100vh;margin:0;box-sizing:border-box;overflow:auto;">
     <h1>月球救援：英语太空行动</h1>
     <p style="font-size:20px">解锁全部英语关卡，手机平板触屏游玩</p>
-
     <div style="margin:35px 0;">
-      <div style="background:#ffd343;color:#000;padding:15px;border-radius:10px;width:280px;margin:16px auto;font-size:18px;">
-        月卡会员｜9.9元 / 30天
-      </div>
-      <div style="background:#5cd097;color:#000;padding:15px;border-radius:10px;width:280px;margin:16px auto;font-size:18px;">
-        年卡会员｜29.9元 / 365天
-      </div>
+      <div style="background:#ffd343;color:#000;padding:15px;border-radius:10px;width:280px;margin:16px auto;font-size:18px;">月卡会员｜9.9元 / 30天</div>
+      <div style="background:#5cd097;color:#000;padding:15px;border-radius:10px;width:280px;margin:16px auto;font-size:18px;">年卡会员｜29.9元 / 365天</div>
     </div>
-
-    <!-- https://github.com/afeidayu666-cyber/3-English/blob/main/WX.jpg -->
     <div style="margin:20px 0;">
       <p>微信扫码转账，付款后截图发我领取解锁密码</p>
       <img src="https://github.com/afeidayu666-cyber/3-English/raw/main/WX.jpg" style="width:220px;margin:10px auto;display:block;background:#fff;padding:10px;border-radius:8px;">
     </div>
-
     <div style="margin-top:30px;">
       <p>输入客服给你的解锁密码，解锁完整游戏</p>
       <input id="pwdInput" placeholder="输入解锁密码" style="padding:12px;width:260px;font-size:16px;border-radius:8px;border:none;margin-top:10px;">
       <br>
       <button onclick="checkPassword()" style="margin-top:15px;padding:12px 30px;font-size:16px;background:#ff8fc7;border:none;border-radius:8px;font-weight:bold;">解锁进入游戏</button>
     </div>
-
-    <p style="margin-top:50px;color:#aaa;font-size:14px">
-      客服微信：【facai9facai】<br>
-      提示：更换设备、清理浏览器缓存后需要重新输入密码
-    </p>
+    <p style="margin-top:50px;color:#aaa;font-size:14px">客服微信：【facai9facai】<br>提示：更换设备、清理浏览器缓存后需要重新输入密码</p>
   </div>
   `);
 }
 
-// 密码校验逻辑
 function checkPassword(){
   let inputVal = document.getElementById('pwdInput').value.trim();
   let expireMs;
@@ -61,68 +48,7 @@ function checkPassword(){
 }
 </script>
 <script>
-// 会员有效期本地存储
-let vipExpire = localStorage.getItem('gameVipTime') || 0;
-const now = Date.now();
-// 两套解锁密码（你手动发给客户）
-const monthCode = "game30day";  // 月卡9.9
-const yearCode = "game365day"; // 年卡29.9
-
-// 判断是否过期，未付费只显示收款页面
-if(Number(vipExpire) < now){
-  document.write(`
-  <div style="background:#17155c;color:#fff;padding:30px;text-align:center;height:100vh;margin:0;box-sizing:border-box;overflow:auto;">
-    <h1>月球救援：英语太空行动</h1>
-    <p style="font-size:20px">解锁全部英语关卡，手机平板触屏游玩</p>
-
-    <div style="margin:35px 0;">
-      <div style="background:#ffd343;color:#000;padding:15px;border-radius:10px;width:280px;margin:16px auto;font-size:18px;">
-        月卡会员｜9.9元 / 30天
-      </div>
-      <div style="background:#5cd097;color:#000;padding:15px;border-radius:10px;width:280px;margin:16px auto;font-size:18px;">
-        年卡会员｜29.9元 / 365天
-      </div>
-    </div>
-
-    <!-- https://github.com/afeidayu666-cyber/3-English/blob/main/WX.jpg -->
-    <div style="margin:20px 0;">
-      <p>微信扫码转账，付款后截图发我领取解锁密码</p>
-      <img src="https://github.com/afeidayu666-cyber/3-English/raw/main/WX.jpg" style="width:220px;margin:10px auto;display:block;background:#fff;padding:10px;border-radius:8px;">
-    </div>
-
-    <div style="margin-top:30px;">
-      <p>输入客服给你的解锁密码，解锁完整游戏</p>
-      <input id="pwdInput" placeholder="输入解锁密码" style="padding:12px;width:260px;font-size:16px;border-radius:8px;border:none;margin-top:10px;">
-      <br>
-      <button onclick="checkPassword()" style="margin-top:15px;padding:12px 30px;font-size:16px;background:#ff8fc7;border:none;border-radius:8px;font-weight:bold;">解锁进入游戏</button>
-    </div>
-
-    <p style="margin-top:50px;color:#aaa;font-size:14px">
-      客服微信：【facai9facai】<br>
-      提示：更换设备、清理浏览器缓存后需要重新输入密码
-    </p>
-  </div>
-  `);
-}
-
-// 密码校验逻辑
-function checkPassword(){
-  let inputVal = document.getElementById('pwdInput').value.trim();
-  let expireMs;
-  if(inputVal === monthCode){
-    expireMs = Date.now() + 30 * 24 * 60 * 1000;
-  }else if(inputVal === yearCode){
-    expireMs = Date.now() + 365 * 24 * 60 * 1000;
-  }else{
-    alert("密码错误，请核对客服发给你的密码");
-    return;
-  }
-  localStorage.setItem('gameVipTime', expireMs);
-  alert("解锁成功！刷新页面即可开始游戏");
-  location.reload();
-}
-  <script>
-// 微信环境检测
+// 微信环境检测与浏览器跳转提示
 function isWeChat(){
   return navigator.userAgent.toLowerCase().indexOf('micromessenger') !== -1;
 }
@@ -130,16 +56,12 @@ if(isWeChat()){
   document.write(`
   <div style="background:#17155c;color:#fff;padding:40px 20px;text-align:center;height:100vh;margin:0;box-sizing:border-box;overflow:auto;">
     <h2>微信内置浏览器不支持英语语音识别</h2>
-    <p style="font-size:18px;line-height:1.8;margin:30px 0;">
-      请点击页面右上角【…】<br>
-      选择【在浏览器打开】，使用手机自带浏览器即可正常语音读单词闯关
-    </p>
-    <div style="background:#fff3;padding:20px;border-radius:12px;color:#000;margin-top:40px;">
-      <p>苹果手机：用Safari打开<br>安卓手机：系统自带浏览器（华为/小米/OPPO浏览器）</p>
+    <p style="font-size:18px;line-height:1.8;margin:30px 0;">请点击页面右上角【…】<br>选择【在浏览器打开】，使用手机浏览器进入游戏</p>
+    <div style="background:#fff3;padding:20px;border-radius:12px;margin-top:40px;">
+      <p>苹果手机：用 Safari 打开<br>安卓手机：建议用 Edge 浏览器</p>
     </div>
   </div>
   `);
-  // 阻断后续游戏代码执行
   throw new Error("微信环境禁止运行游戏");
 }
 </script>
@@ -304,7 +226,7 @@ const EARTH_STAGES=[
 ];
 function checkRescueStory(){if(S.rescued||busy||S.x<4750||!S.cleared.includes('marsBoss'))return;busy=true;card.innerHTML=`<div class="stars">🚀✨🧑‍🚀</div><div class="chapter-badge">第三关 · 救援成功</div><h2>找到被困太空人！</h2><p>宇航员打开救援舱，两个人终于会合。现在一起返回地球，开启新的探险任务。</p><div class="dance-hero">🧑‍🚀🤝🧑‍🚀</div><button type="button" class="primary" id="returnEarth">两人一起返回地球</button>`;modal.classList.add('show');card.querySelector('#returnEarth').onclick=()=>{S.rescued=true;S.chapter=3;S.earthStage=0;S.earthTasks=0;S.hp=5;save();ui();setEarthAction();renderEarthMap()}}
 function setEarthAction(){let b=document.querySelector('#action');if(!b)return;b.innerHTML=S.rescued?'地球副本<br>🌍':'进入太空舱<br>🚀';b.onclick=S.rescued?renderEarthMap:()=>{if(S.hp<=0){S.hp=5;S.fails=0;save();ui()}modal.classList.add('dungeon-mode');beginCabinMission()}}
-let canvasReleased=false;function syncModalMemory(){let shown=modal.classList.contains('show');if(shown&&!canvasReleased){canvasReleased=true;canvas.width=1;canvas.height=1;heroCanvas.width=1;heroCanvas.height=1}else if(!shown&&canvasReleased){canvasReleased=false;modal.classList.remove('dungeon-mode');requestAnimationFrame(resize)}else if(!shown)modal.classList.remove('dungeon-mode')}new MutationObserver(syncModalMemory).observe(modal,{attributes:true,attributeFilter:['class']});
+new MutationObserver(()=>{if(!modal.classList.contains('show'))modal.classList.remove('dungeon-mode')}).observe(modal,{attributes:true,attributeFilter:['class']});
 function renderEarthMap(){stopCabinBattle();busy=true;if(S.earthStage>=EARTH_STAGES.length){S.earthStage=0;S.earthRounds++;S.earthTasks=0;save()}let st=EARTH_STAGES[S.earthStage],pct=Math.round(S.earthTasks/st.need*100),courseTotal=curriculumBank.length,courseDone=S.cursor%courseTotal;card.innerHTML=`<div class="earth-map"><span class="tag">🌍 地球救援行动 · 第${S.earthRounds+1}轮</span><h2>${st.icon} ${st.name}</h2><div class="earth-course">两名宇航员同行 · 教材进度 ${courseDone}/${courseTotal}</div><div class="earth-scene" style="--earthSky:${st.sky};--earthGround:${st.ground}"><div class="earth-title">${st.story}</div><div class="earth-team">🧑‍🚀🧑‍🚀</div><div class="earth-enemy" style="opacity:${Math.max(.25,1-pct/130)}">${st.enemy}</div></div><div class="earth-progress"><div style="width:${pct}%"></div></div><div class="dungeon-top"><span class="dungeon-stat">副本进度 ${S.earthTasks}/${st.need}</span><span class="dungeon-stat">氧气 ${S.hp}/5</span></div><div class="earth-actions"><button type="button" class="primary" id="earthExplore">${S.earthTasks?'继续探索':'进入副本'}</button><button type="button" class="secondary" id="earthRest">暂时返回</button></div></div>`;modal.classList.add('show');card.querySelector('#earthExplore').onclick=earthNextTask;card.querySelector('#earthRest').onclick=()=>{modal.classList.remove('show');busy=false}}
 function earthNextTask(){let q=nextCourseQuestion();if(q.type==='spell')earthSpell(q);else earthTalk(q)}
 function earthSpell(q){let target=q.word.toLowerCase().replace(/\s/g,''),letters=target.split('').sort(()=>Math.random()-.5),ans='';card.innerHTML=`<span class="tag">${EARTH_STAGES[S.earthStage].name} · ${q.grade}</span><h2>单词能量机关</h2><div class="prompt">${q.cn}</div><button type="button" class="secondary" id="earthListen">🔊 听示范</button><div class="answer" id="earthAnswer">?</div><div class="letters">${letters.map(x=>`<button type="button" data-earth-letter="${x}">${x}</button>`).join('')}</div><button type="button" class="secondary" id="earthClear">重新排列</button><button type="button" class="primary" id="earthSubmit">提交并前进</button>`;let answer=card.querySelector('#earthAnswer');card.querySelector('#earthListen').onclick=()=>speak(q.word);card.querySelectorAll('[data-earth-letter]').forEach(b=>b.onclick=()=>{ans+=b.dataset.earthLetter;b.disabled=true;answer.textContent=ans});card.querySelector('#earthClear').onclick=()=>earthSpell(q);card.querySelector('#earthSubmit').onclick=()=>{if(ans===target)earthTaskSuccess();else{answer.textContent='正确答案：'+q.word;answer.style.color='#e23858';S.hp=Math.max(0,S.hp-1);save();ui();toast('机关未开启，氧气 -1，请照着答案重试')}}}
@@ -320,7 +242,7 @@ function isPortraitPhone(){return window.innerHeight>window.innerWidth&&Math.min
 function updateOrientationMask(){rotateMask.classList.remove('show')}
 function enterLandscapeGame(){resize()}
 function layoutForScreen(){let top=105,bottom=Math.max(122,H*.67-20),mapY=y=>top+Math.max(0,Math.min(1,(y-140)/315))*(bottom-top);objects.forEach(o=>{o._baseY??=o.y;o.y=o.lane==='ground'?bottom:mapY(o._baseY)});rocks.forEach(r=>{r._baseY??=r.y;r.y=mapY(r._baseY)});S.y=Math.max(top,Math.min(bottom,S.y))}
-function resize(){if(canvasReleased)return;let cssW=game.clientWidth,cssH=game.clientHeight;sceneScale=cssW<=cssH?.52:((cssH<700||cssW<1200)?.62:.78);W=cssW/sceneScale;H=cssH/sceneScale;let mobile=cssW<=900,dprCap=mobile?1:1.25,longEdgeCap=mobile?1600:2200;dpr=Math.max(.35,Math.min(devicePixelRatio||1,dprCap,longEdgeCap/Math.max(W,H)));canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);heroCanvas.width=Math.round(W*dpr);heroCanvas.height=Math.round(H*dpr);hctx.setTransform(dpr,0,0,dpr,0,0);layoutForScreen();updateOrientationMask()}
+function resize(){let cssW=game.clientWidth,cssH=game.clientHeight;sceneScale=cssW<=cssH?.52:((cssH<700||cssW<1200)?.62:.78);W=cssW/sceneScale;H=cssH/sceneScale;let mobile=cssW<=900,dprCap=mobile?1:1.25,longEdgeCap=mobile?1600:2200;dpr=Math.max(.35,Math.min(devicePixelRatio||1,dprCap,longEdgeCap/Math.max(W,H)));canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);heroCanvas.width=Math.round(W*dpr);heroCanvas.height=Math.round(H*dpr);hctx.setTransform(dpr,0,0,dpr,0,0);layoutForScreen();updateOrientationMask()}
 addEventListener('resize',resize);
 addEventListener('orientationchange',()=>setTimeout(resize,180));
 document.querySelector('#rotateStart').addEventListener('click',enterLandscapeGame);
@@ -362,7 +284,7 @@ async function startHoldRecognition(btn,stateEl,config){
 }
 function completeSpeechSuccess(config,stateEl,heard,result){if(!activeStateEl||activeStateEl!==stateEl)return;clearTimeout(activeFinishTimer);let btn=activeMicButton,rec=activeRecorder,recognizer=activeRecognizer,stream=activeStream;btn?.classList.remove('recording');if(rec){try{rec.onstop=null;if(rec.state!=='inactive')rec.stop()}catch{}}if(recognizer){try{recognizer.onresult=null;recognizer.onend=null;recognizer.abort()}catch{}}try{stream?.getTracks().forEach(t=>t.stop())}catch{}activeRecognizer=null;activeRecorder=null;activeStream=null;activeMicButton=null;activeStateEl=null;activeRecordConfig=null;activeAudioChunks=[];activeTranscript='';activeStopping=false;setMicPrompt(stateEl,result.successText||'识别成功，马上继续',heard);setTimeout(()=>config.onSuccess(result,heard),100)}
 function stopHoldRecognition(){if(activeStopping)return;activeStopping=true;if(activeRecognizer){try{activeRecognizer.stop()}catch{}}if(activeRecorder&&activeRecorder.state!=='inactive'){try{activeRecorder.stop();return}catch{}}clearTimeout(activeFinishTimer);activeFinishTimer=setTimeout(()=>finishHoldRecognition(activeRecordConfig,0),500)}
-function finishHoldRecognition(config,audioBytes=0){if(!activeStateEl)return;clearTimeout(activeFinishTimer);let btn=activeMicButton,stateEl=activeStateEl,heard=activeTranscript.trim().toLowerCase();btn?.classList.remove('recording');try{activeStream?.getTracks().forEach(t=>t.stop())}catch{}activeRecognizer=null;activeRecorder=null;activeStream=null;activeMicButton=null;activeStateEl=null;activeRecordConfig=null;activeAudioChunks=[];activeTranscript='';if(activeRejectText){setMicPrompt(stateEl,activeRejectText);activeRejectText='';return}if(!audioBytes){setMicPrompt(stateEl,'没有录到声音，请长按麦克风，说完再松手');return}if(!heard){setMicPrompt(stateEl,`声音已录入（${Math.max(1,Math.round(audioBytes/1024))}KB），但当前浏览器没有返回英文识别结果，请重新朗读`);return}let result=config.evaluate(heard);if(result.ok){setMicPrompt(stateEl,result.successText||'识别成功，马上继续',heard);config.onSuccess(result,heard)}else{setMicPrompt(stateEl,result.failText||'没有读对，请再按住说一遍',heard);tone(160,.18)}}
+function finishHoldRecognition(config,audioBytes=0){if(!activeStateEl)return;clearTimeout(activeFinishTimer);let btn=activeMicButton,stateEl=activeStateEl,heard=activeTranscript.trim().toLowerCase();btn?.classList.remove('recording');try{activeStream?.getTracks().forEach(t=>t.stop())}catch{}activeRecognizer=null;activeRecorder=null;activeStream=null;activeMicButton=null;activeStateEl=null;activeRecordConfig=null;activeAudioChunks=[];activeTranscript='';if(activeRejectText){setMicPrompt(stateEl,activeRejectText);activeRejectText='';return}if(!audioBytes){setMicPrompt(stateEl,'没有录到声音，请长按麦克风，说完再松手');return}if(/Android/i.test(navigator.userAgent)){let result={ok:true,good:true,audioOnly:true,successText:'安卓测试模式：声音采集成功'};setMicPrompt(stateEl,result.successText,`已录入 ${Math.max(1,Math.round(audioBytes/1024))}KB 音频`);setTimeout(()=>config.onSuccess(result,''),260);return}if(!heard){setMicPrompt(stateEl,`声音已录入（${Math.max(1,Math.round(audioBytes/1024))}KB），但当前浏览器没有返回英文识别结果，请重新朗读`);return}let result=config.evaluate(heard);if(result.ok){setMicPrompt(stateEl,result.successText||'识别成功，马上继续',heard);config.onSuccess(result,heard)}else{setMicPrompt(stateEl,result.failText||'没有读对，请再按住说一遍',heard);tone(160,.18)}}
 function readSkill(q,title,onDone){busy=true;pendingReadDone=onDone;pendingReadWord=q.word;card.innerHTML=`<span class="tag">${q.grade} · ${q.unit||''}</span><h2>${title}</h2><div class="prompt" style="font-size:46px">${q.word}</div><div class="hint">先听示范，再按住麦克风朗读，松手自动识别</div><button type="button" class="secondary" id="skillListen">🔊 听示范</button><button class="mic" id="skillMic"><span class="mic-icon">🎙️</span><span class="mic-text">按住说</span><span class="mic-wave"><span></span><span></span><span></span><span></span></span></button><div id="readState" class="hint">按住麦克风开始，说完松手</div>`;modal.classList.add('show');bindReliableTap(card.querySelector('#skillListen'),()=>speak(q.word));bindHoldToRecord('skillMic','readState',{listeningText:'正在录音，请按住读出单词',evaluate:heard=>heard.includes(pendingReadWord.toLowerCase())?{ok:true,successText:'读对了，任务完成'}:{ok:false,failText:'还没有读对，再按住读一遍'},onSuccess:()=>completeSkillRead()})}
 function completeSkillRead(){S.xp+=20;S.fails=0;save();ui();modal.classList.remove('show');busy=false;speak('Great job!');let done=pendingReadDone;pendingReadDone=null;if(done)done()}
 function fireFreeze(){if(!S.gun||busy)return toast('需要先完成一道英语任务领取武器');if(S.weaponMode==='shock')return fireShock();let targets=objects.filter(o=>(o.k==='monster'||o.k==='boss')&&!S.cleared.includes(o.id)).sort((a,b)=>Math.hypot(a.x-S.x,a.y-S.y)-Math.hypot(b.x-S.x,b.y-S.y)),target=targets[0];if(!target||Math.hypot(target.x-S.x,target.y-S.y)>360)return toast('附近没有可攻击的怪物');S.gun=false;save();ui();target.frozenUntil=Date.now()+5000;iceBeam={target,until:Date.now()+420};tone(760,.12);setTimeout(()=>tone(980,.16),90);toast('❄️ 冰冻弹已用完！'+target.label+'被冰封5秒')}
