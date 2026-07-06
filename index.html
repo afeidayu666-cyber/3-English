@@ -60,6 +60,91 @@ function checkPassword(){
   location.reload();
 }
 </script>
+<script>
+// 微信环境检测
+function isWeChat(){
+  return navigator.userAgent.toLowerCase().indexOf('micromessenger') !== -1;
+}
+if(isWeChat()){
+  document.write(`
+  <div style="background:#17155c;color:#fff;padding:40px 20px;text-align:center;height:100vh;margin:0;box-sizing:border-box;overflow:auto;">
+    <h2>微信内置浏览器不支持英语语音识别</h2>
+    <p style="font-size:18px;line-height:1.8;margin:30px 0;">
+      请点击页面右上角【…】<br>
+      选择【在浏览器打开】，使用手机自带浏览器即可正常语音读单词闯关
+    </p>
+    <div style="background:#fff3;padding:20px;border-radius:12px;color:#000;margin-top:40px;">
+      <p>苹果手机：用Safari打开<br>安卓手机：系统自带浏览器（华为/小米/OPPO浏览器）</p>
+    </div>
+  </div>
+  `);
+  // 阻断后续游戏代码执行
+  throw new Error("微信环境禁止运行游戏");
+}
+</script>
+
+<script>
+// 会员有效期本地存储
+let vipExpire = localStorage.getItem('gameVipTime') || 0;
+const now = Date.now();
+// 两套解锁密码（你手动发给客户）
+const monthCode = "game30day";  // 月卡9.9
+const yearCode = "game365day"; // 年卡29.9
+
+// 判断是否过期，未付费只显示收款页面
+if(Number(vipExpire) < now){
+  document.write(`
+  <div style="background:#17155c;color:#fff;padding:30px;text-align:center;height:100vh;margin:0;box-sizing:border-box;overflow:auto;">
+    <h1>月球救援：英语太空行动</h1>
+    <p style="font-size:20px">解锁全部英语关卡，手机平板触屏游玩</p>
+
+    <div style="margin:35px 0;">
+      <div style="background:#ffd343;color:#000;padding:15px;border-radius:10px;width:280px;margin:16px auto;font-size:18px;">
+        月卡会员｜9.9元 / 30天
+      </div>
+      <div style="background:#5cd097;color:#000;padding:15px;border-radius:10px;width:280px;margin:16px auto;font-size:18px;">
+        年卡会员｜29.9元 / 365天
+      </div>
+    </div>
+
+    <!-- https://github.com/afeidayu666-cyber/3-English/blob/main/WX.jpg -->
+    <div style="margin:20px 0;">
+      <p>微信扫码转账，付款后截图发我领取解锁密码</p>
+      <img src="https://github.com/afeidayu666-cyber/3-English/raw/main/WX.jpg" style="width:220px;margin:10px auto;display:block;background:#fff;padding:10px;border-radius:8px;">
+    </div>
+
+    <div style="margin-top:30px;">
+      <p>输入客服给你的解锁密码，解锁完整游戏</p>
+      <input id="pwdInput" placeholder="输入解锁密码" style="padding:12px;width:260px;font-size:16px;border-radius:8px;border:none;margin-top:10px;">
+      <br>
+      <button onclick="checkPassword()" style="margin-top:15px;padding:12px 30px;font-size:16px;background:#ff8fc7;border:none;border-radius:8px;font-weight:bold;">解锁进入游戏</button>
+    </div>
+
+    <p style="margin-top:50px;color:#aaa;font-size:14px">
+      客服微信：【facai9facai】<br>
+      提示：更换设备、清理浏览器缓存后需要重新输入密码
+    </p>
+  </div>
+  `);
+}
+
+// 密码校验逻辑
+function checkPassword(){
+  let inputVal = document.getElementById('pwdInput').value.trim();
+  let expireMs;
+  if(inputVal === monthCode){
+    expireMs = Date.now() + 30 * 24 * 60 * 1000;
+  }else if(inputVal === yearCode){
+    expireMs = Date.now() + 365 * 24 * 60 * 1000;
+  }else{
+    alert("密码错误，请核对客服发给你的密码");
+    return;
+  }
+  localStorage.setItem('gameVipTime', expireMs);
+  alert("解锁成功！刷新页面即可开始游戏");
+  location.reload();
+}
+</script>
 <!doctype html>
 <html lang="zh-CN">
 <head>
