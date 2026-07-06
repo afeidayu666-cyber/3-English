@@ -61,29 +61,6 @@ function checkPassword(){
 }
 </script>
 <script>
-// 微信环境检测
-function isWeChat(){
-  return navigator.userAgent.toLowerCase().indexOf('micromessenger') !== -1;
-}
-if(isWeChat()){
-  document.write(`
-  <div style="background:#17155c;color:#fff;padding:40px 20px;text-align:center;height:100vh;margin:0;box-sizing:border-box;overflow:auto;">
-    <h2>微信内置浏览器不支持英语语音识别</h2>
-    <p style="font-size:18px;line-height:1.8;margin:30px 0;">
-      请点击页面右上角【…】<br>
-      选择【在浏览器打开】，使用手机自带浏览器即可正常语音读单词闯关
-    </p>
-    <div style="background:#fff3;padding:20px;border-radius:12px;color:#000;margin-top:40px;">
-      <p>苹果手机：用Safari打开<br>安卓手机：系统自带浏览器（华为/小米/OPPO浏览器）</p>
-    </div>
-  </div>
-  `);
-  // 阻断后续游戏代码执行
-  throw new Error("微信环境禁止运行游戏");
-}
-</script>
-
-<script>
 // 会员有效期本地存储
 let vipExpire = localStorage.getItem('gameVipTime') || 0;
 const now = Date.now();
@@ -143,6 +120,27 @@ function checkPassword(){
   localStorage.setItem('gameVipTime', expireMs);
   alert("解锁成功！刷新页面即可开始游戏");
   location.reload();
+}
+  <script>
+// 微信环境检测
+function isWeChat(){
+  return navigator.userAgent.toLowerCase().indexOf('micromessenger') !== -1;
+}
+if(isWeChat()){
+  document.write(`
+  <div style="background:#17155c;color:#fff;padding:40px 20px;text-align:center;height:100vh;margin:0;box-sizing:border-box;overflow:auto;">
+    <h2>微信内置浏览器不支持英语语音识别</h2>
+    <p style="font-size:18px;line-height:1.8;margin:30px 0;">
+      请点击页面右上角【…】<br>
+      选择【在浏览器打开】，使用手机自带浏览器即可正常语音读单词闯关
+    </p>
+    <div style="background:#fff3;padding:20px;border-radius:12px;color:#000;margin-top:40px;">
+      <p>苹果手机：用Safari打开<br>安卓手机：系统自带浏览器（华为/小米/OPPO浏览器）</p>
+    </div>
+  </div>
+  `);
+  // 阻断后续游戏代码执行
+  throw new Error("微信环境禁止运行游戏");
 }
 </script>
 <!doctype html>
