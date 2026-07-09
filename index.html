@@ -5,8 +5,8 @@ const now = Date.now();
 const trialParams = new URLSearchParams(location.search);
 const trialMode = trialParams.get('trial') === '1min' ? '1min' : 'normal';
 const trialKey = trialMode === '1min' ? 'gameTrialStart_1min_' + (trialParams.get('testid') || 'default') : 'gameTrialStart';
-const trialLabel = trialMode === '1min' ? '1分钟测试' : '12小时';
-const trialHours = 12;
+const trialLabel = trialMode === '1min' ? '1分钟测试' : '1小时';
+const trialHours = 1;
 let trialStart = localStorage.getItem(trialKey);
 if(!trialStart){
   trialStart = now;
@@ -14,43 +14,42 @@ if(!trialStart){
 }
 const trialMs = trialMode === '1min' ? 60 * 1000 : trialHours * 60 * 60 * 1000;
 const trialExpired = now - Number(trialStart) >= trialMs;
-// 两套解锁密码（你手动发给客户）
-const monthCode = "game30day";  // 体验价9元
-const yearCode = "game365day"; // 年卡29.9
+// 客服解锁密码（你手动发给客户）
+const monthCode = "game30day";  // 19.9 永久使用
+const yearCode = "game365day";  // 兼容旧密码，也按永久处理
 
-// 判断是否过期，未付费只显示收款页面
-if((Number(vipExpire) < now || trialMode === '1min') && trialExpired){
-  document.write(`
-  <div style="background:#17155c;color:#fff;padding:30px;text-align:center;height:100vh;margin:0;box-sizing:border-box;overflow:auto;">
-    <h1>月球救援：英语太空行动</h1>
-    <div style="background:#fff3;color:#ffd343;padding:12px;border-radius:10px;width:300px;margin:15px auto;font-size:17px;font-weight:bold;">免费试玩${trialLabel}已结束</div>
-    <p style="font-size:20px">解锁全部英语关卡，手机平板触屏游玩</p>
-    <div style="margin:35px 0;">
-      <div style="background:#ffd343;color:#000;padding:15px;border-radius:10px;width:280px;margin:16px auto;font-size:18px;">体验解锁｜9元 / 30天</div>
-      <div style="background:#5cd097;color:#000;padding:15px;border-radius:10px;width:280px;margin:16px auto;font-size:18px;">添加客服微信，获取继续游戏密码</div>
-    </div>
-    <div style="margin:20px 0;">
-      <p>微信扫码转账，付款后截图发我领取解锁密码</p>
-      <img src="https://github.com/afeidayu666-cyber/3-English/raw/main/WX.jpg" style="width:220px;margin:10px auto;display:block;background:#fff;padding:10px;border-radius:8px;">
-    </div>
-    <div style="margin-top:30px;">
-      <p>输入客服给你的解锁密码，解锁完整游戏</p>
-      <input id="pwdInput" placeholder="输入解锁密码" style="padding:12px;width:260px;font-size:16px;border-radius:8px;border:none;margin-top:10px;">
+function showPaywall(){
+  if(document.getElementById('paywallMask')) return;
+  const html = `
+  <div id="paywallMask" style="position:fixed;inset:0;z-index:999999;background:#17155c;color:#fff;padding:30px;text-align:center;box-sizing:border-box;overflow:auto;font-family:Microsoft YaHei,system-ui,sans-serif;">
+    <h1 style="margin-top:20px;">月球救援：英语太空行动</h1>
+    <div style="background:#fff3;color:#ffd343;padding:12px;border-radius:10px;width:300px;max-width:90%;margin:15px auto;font-size:17px;font-weight:bold;">免费试玩${trialLabel}已结束</div>
+    <p style="font-size:20px;line-height:1.6;">添加客服微信，获取继续游戏密码</p>
+    <div style="background:#ffd343;color:#000;padding:16px;border-radius:12px;width:290px;max-width:90%;margin:24px auto;font-size:20px;font-weight:900;">19.9 元｜永久使用</div>
+    <div style="background:#fff;color:#17155c;padding:16px;border-radius:12px;width:290px;max-width:90%;margin:18px auto;font-size:22px;font-weight:900;">客服微信：facai9facai</div>
+    <button onclick="navigator.clipboard&&navigator.clipboard.writeText('facai9facai');alert('客服微信已复制')" style="padding:12px 22px;border:none;border-radius:10px;background:#5cd097;color:#000;font-size:16px;font-weight:bold;">复制客服微信</button>
+    <div style="margin-top:28px;">
+      <p>输入客服给你的解锁密码，继续使用完整游戏</p>
+      <input id="pwdInput" placeholder="输入解锁密码" style="padding:12px;width:260px;max-width:86%;font-size:16px;border-radius:8px;border:none;margin-top:10px;">
       <br>
       <button onclick="checkPassword()" style="margin-top:15px;padding:12px 30px;font-size:16px;background:#ff8fc7;border:none;border-radius:8px;font-weight:bold;">解锁进入游戏</button>
     </div>
-    <p style="margin-top:50px;color:#aaa;font-size:14px">客服微信：【facai9facai】<br>提示：更换设备、清理浏览器缓存后需要重新输入密码</p>
-  </div>
-  `);
+    <p style="margin-top:40px;color:#ccc;font-size:14px;line-height:1.7;">提示：更换设备、清理浏览器缓存后需要重新输入密码。<br>微信内和浏览器内都会正常计时。</p>
+  </div>`;
+  if(document.body) document.body.insertAdjacentHTML('beforeend', html);
+  else document.addEventListener('DOMContentLoaded', () => showPaywall(), {once:true});
+}
+
+// 判断是否过期，过期后直接弹客服微信，不清空游戏页面
+if((Number(vipExpire) < now || trialMode === '1min') && trialExpired){
+  showPaywall();
 }
 
 function checkPassword(){
   let inputVal = document.getElementById('pwdInput').value.trim();
   let expireMs;
-  if(inputVal === monthCode){
-    expireMs = Date.now() + 30 * 24 * 60 * 1000;
-  }else if(inputVal === yearCode){
-    expireMs = Date.now() + 365 * 24 * 60 * 1000;
+  if(inputVal === monthCode || inputVal === yearCode){
+    expireMs = Date.now() + 100 * 365 * 24 * 60 * 60 * 1000;
   }else{
     alert("密码错误，请核对客服发给你的密码");
     return;
@@ -64,7 +63,7 @@ setInterval(function(){
     let vipExpireNow = Number(localStorage.getItem('gameVipTime') || 0);
     let trialStartNow = Number(localStorage.getItem(trialKey) || Date.now());
     if((vipExpireNow < Date.now() || trialMode === '1min') && Date.now() - trialStartNow >= trialMs){
-      location.reload();
+      showPaywall();
     }
   }catch(e){}
 }, 60000);
@@ -75,23 +74,14 @@ function isWeChat(){
   return navigator.userAgent.toLowerCase().indexOf('micromessenger') !== -1;
 }
 if(isWeChat()){
-  document.write(`
-  <div style="background:#17155c;color:#fff;padding:40px 20px;text-align:center;height:100vh;margin:0;box-sizing:border-box;overflow:auto;">
-    <h2>微信内置浏览器不支持英语语音识别</h2>
-    <p style="font-size:18px;line-height:1.8;margin:30px 0;">请点击页面右上角【…】<br>选择【在浏览器打开】，使用手机浏览器进入游戏</p>
-    <div style="background:#fff3;padding:20px;border-radius:12px;margin-top:40px;">
-      <p>苹果手机：用 Safari 打开<br>安卓手机：建议用 Edge 浏览器</p>
-    </div>
-    <button onclick="navigator.clipboard&&navigator.clipboard.writeText(location.href);alert('链接已复制，请粘贴到手机浏览器打开')" style="margin-top:22px;padding:14px 24px;border:none;border-radius:10px;background:#ffd343;color:#111;font-size:17px;font-weight:bold;">复制游戏链接</button>
-    <p style="margin-top:18px;color:#ffd343;font-weight:bold;">微信内无法稳定录音识别，必须换浏览器打开</p>
-  </div>
-  `);
-  if(/Android/i.test(navigator.userAgent)){
-    setTimeout(function(){
-      location.href='intent://'+location.host+location.pathname+location.search+'#Intent;scheme=https;end';
-    },800);
-  }
-  throw new Error("微信环境禁止运行游戏");
+  document.addEventListener('DOMContentLoaded', function(){
+    const tip = document.createElement('div');
+    tip.style.cssText = 'position:fixed;left:10px;right:10px;top:10px;z-index:99999;background:#fff8d8;color:#24175c;border:3px solid #ffd343;border-radius:12px;padding:10px 12px;font:700 14px Microsoft YaHei;box-shadow:0 6px 18px #0005;text-align:center;';
+    tip.innerHTML = '微信内可试玩计时；如录音不稳定，请点右上角“…”选择在浏览器打开。<button type="button" style="margin-left:8px;border:0;border-radius:8px;background:#ffd343;padding:5px 9px;font-weight:900;">知道了</button>';
+    tip.querySelector('button').onclick = () => tip.remove();
+    document.body.appendChild(tip);
+    setTimeout(() => tip.remove(), 9000);
+  });
 }
 </script>
 <!doctype html>
