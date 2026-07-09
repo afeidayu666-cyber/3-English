@@ -188,7 +188,7 @@ const objects=[{id:'home',x:270,y:350,k:'home',label:'救援太空舱'},{id:'doo
 const rocks=[{x:520,y:330,r:30},{x:760,y:455,r:34},{x:1010,y:350,r:28},{x:1210,y:180,r:34},{x:1450,y:410,r:31},{x:1640,y:300,r:38}];
 const LEVELS=[
  {name:'第一关·月球救援',from:0,to:1900,sky1:'#102b78',sky2:'#315ed1',sky3:'#56a5e8',hill:'#d4d9e5',ground:'#aeb9ca',need:3},
- {name:'第二关·海底世界',from:1900,to:3500,sky1:'#063d7a',sky2:'#087fba',sky3:'#38d7df',hill:'#39c6ad',ground:'#147c84',need:4},
+ {name:'第二关·海底世界',from:1900,to:3500,sky1:'#063d7a',sky2:'#087fba',sky3:'#38d7df',hill:'#39c6ad',ground:'#147c84',need:3},
  {name:'第三关·火星基地',from:3500,to:5100,sky1:'#6b1738',sky2:'#c33f3f',sky3:'#ff9b52',hill:'#ee7c55',ground:'#9d4138',need:3},
  {name:'第四关·冰雪星球',from:5100,to:6600,sky1:'#3d36a5',sky2:'#657be8',sky3:'#b6efff',hill:'#e8fbff',ground:'#9ecfe5',need:4}
 ];
@@ -240,8 +240,8 @@ function earthTaskSuccess(){S.earthTasks++;S.xp+=20;S.fails=0;save();ui();speak(
 function completeEarthStage(){let finished=EARTH_STAGES[S.earthStage];S.xp+=100;S.hp=5;S.earthStage++;S.earthTasks=0;let firstRoundDone=S.earthStage>=EARTH_STAGES.length;if(firstRoundDone){S.earthStage=0;S.earthRounds++}save();ui();card.innerHTML=`<div class="stars">✨✨✨</div><h2>${finished.name}完成！</h2><p>${firstRoundDone?'完整教材冒险第一轮完成！课程会继续循环，帮助孩子反复巩固。':'两名宇航员获得100经验，下一站：'+EARTH_STAGES[S.earthStage].name}</p><button type="button" class="primary" id="nextEarthStage">${firstRoundDone?'开启下一轮复习':'进入下一副本'}</button>`;card.querySelector('#nextEarthStage').onclick=renderEarthMap}
 setInterval(checkRescueStory,900);
 setTimeout(setEarthAction,0);
-function levelTaskCount(level){let n=objects.filter(o=>o.k==='door'&&o.x>=level.from&&o.x<level.to&&S.cleared.includes(o.id)).length;if(level.from===1900&&S.cleared.includes('seaBoss'))n++;return n}
-function missingTasks(level){let list=objects.filter(o=>o.k==='door'&&o.x>=level.from&&o.x<level.to&&!S.cleared.includes(o.id));if(level.from===1900&&!S.cleared.includes('seaBoss')){let boss=objects.find(o=>o.id==='seaBoss');if(boss)list.push(boss)}return list.sort((a,b)=>Math.abs(a.x-S.x)-Math.abs(b.x-S.x))}
+function levelTaskCount(level){return objects.filter(o=>o.k==='door'&&o.x>=level.from&&o.x<level.to&&S.cleared.includes(o.id)).length}
+function missingTasks(level){return objects.filter(o=>o.k==='door'&&o.x>=level.from&&o.x<level.to&&!S.cleared.includes(o.id)).sort((a,b)=>Math.abs(a.x-S.x)-Math.abs(b.x-S.x))}
 function showMissingTaskGuide(level){let miss=missingTasks(level),need=Math.max(0,level.need-levelTaskCount(level)),target=miss[0];if(!target){toast('本关任务记录正在刷新，请靠近发光学习点再试');return}busy=true;keys={};let dir=target.x>=S.x?'右边':'左边',meters=Math.max(1,Math.round(Math.abs(target.x-S.x)/10)),label=target.k==='boss'?target.label:target.label+'（学习门）';card.innerHTML=`<span class="tag">🔎 任务定位 · ${level.name}</span><h2>还差 ${need||1} 个学习任务</h2><div class="speech">未完成：<b>${label}</b></div><div class="hint">它在宇航员${dir}，大约 ${meters} 米。点击“带我过去”，系统会把画面移动到任务附近。</div><button type="button" class="primary" id="guideGo">带我过去</button><button type="button" class="secondary" id="guideBack">我自己找</button>`;modal.classList.add('show');bindReliableTap(card.querySelector('#guideGo'),()=>guarded('定位未完成任务',()=>{S.x=Math.max(level.from+70,Math.min(level.to-120,target.x-95));S.y=Math.max(115,Math.min(H*.68-35,target.y));autoDoorId=null;autoEncounterId=null;save();ui();resumeWorld('已定位到：'+label+'，靠近发光点会自动触发学习')}));bindReliableTap(card.querySelector('#guideBack'),()=>resumeWorld('黄色箭头会继续指向未完成学习点'))}
 function blockedByGate(oldX,newX){for(let i=0;i<LEVELS.length-1;i++){let wall=LEVELS[i].to;if(oldX<wall&&newX>=wall&&levelTaskCount(LEVELS[i])<LEVELS[i].need)return LEVELS[i]}return null}
 const heroCanvas=document.querySelector('#heroCanvas'),hctx=heroCanvas.getContext('2d');
