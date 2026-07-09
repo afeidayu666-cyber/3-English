@@ -5,8 +5,8 @@ const now = Date.now();
 const trialParams = new URLSearchParams(location.search);
 const trialMode = trialParams.get('trial') === '1min' ? '1min' : 'normal';
 const trialKey = trialMode === '1min' ? 'gameTrialStart_1min_' + (trialParams.get('testid') || 'default') : 'gameTrialStart';
-const trialLabel = trialMode === '1min' ? '1分钟测试' : '12小时';
-const trialHours = 12;
+const trialLabel = trialMode === '1min' ? '1分钟测试' : '1小时';
+const trialHours = 1;
 let trialStart = localStorage.getItem(trialKey);
 if(!trialStart){
   trialStart = now;
@@ -68,32 +68,33 @@ setInterval(function(){
     }
   }catch(e){}
 }, 60000);
-</script>
 <script>
-// 微信环境检测与浏览器跳转提示
+// 微信兼容提示 不阻断计时/付费/游戏
 function isWeChat(){
   return navigator.userAgent.toLowerCase().indexOf('micromessenger') !== -1;
 }
 if(isWeChat()){
-  document.write(`
-  <div style="background:#17155c;color:#fff;padding:40px 20px;text-align:center;height:100vh;margin:0;box-sizing:border-box;overflow:auto;">
-    <h2>微信内置浏览器不支持英语语音识别</h2>
-    <p style="font-size:18px;line-height:1.8;margin:30px 0;">请点击页面右上角【…】<br>选择【在浏览器打开】，使用手机浏览器进入游戏</p>
-    <div style="background:#fff3;padding:20px;border-radius:12px;margin-top:40px;">
-      <p>苹果手机：用 Safari 打开<br>安卓手机：建议用 Edge 浏览器</p>
-    </div>
-    <button onclick="navigator.clipboard&&navigator.clipboard.writeText(location.href);alert('链接已复制，请粘贴到手机浏览器打开')" style="margin-top:22px;padding:14px 24px;border:none;border-radius:10px;background:#ffd343;color:#111;font-size:17px;font-weight:bold;">复制游戏链接</button>
-    <p style="margin-top:18px;color:#ffd343;font-weight:bold;">微信内无法稳定录音识别，必须换浏览器打开</p>
-  </div>
-  `);
-  if(/Android/i.test(navigator.userAgent)){
-    setTimeout(function(){
-      location.href='intent://'+location.host+location.pathname+location.search+'#Intent;scheme=https;end';
-    },800);
-  }
-  throw new Error("微信环境禁止运行游戏");
+  const wechatTip = document.createElement('div');
+  wechatTip.style.position = 'fixed';
+  wechatTip.style.top = '0';
+  wechatTip.style.left = '0';
+  wechatTip.style.right = '0';
+  wechatTip.style.background = '#ffd343';
+  wechatTip.style.color = '#111';
+  wechatTip.style.padding = '10px 12px';
+  wechatTip.style.textAlign = 'center';
+  wechatTip.style.fontSize = '14px';
+  wechatTip.style.zIndex = '99999';
+  wechatTip.style.lineHeight = '1.6';
+  wechatTip.innerHTML = `⚠️微信麦克风识别不稳定，建议右上角...用系统浏览器打开
+  <button onclick="navigator.clipboard&&navigator.clipboard.writeText(location.href);alert('链接复制成功')" style="margin:0 8px;padding:4px 10px;border:0;border-radius:6px;background:#17155c;color:#fff;">复制链接</button>
+  <button onclick="this.parentElement.remove()" style="padding:4px 10px;border:0;border-radius:6px;background:#888;color:#fff;">关闭提示</button>`;
+  window.addEventListener('DOMContentLoaded',()=>{
+    document.body.prepend(wechatTip);
+  })
 }
 </script>
+<script>
 <!doctype html>
 <html lang="zh-CN">
 <head>
