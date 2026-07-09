@@ -2,24 +2,28 @@
 // 会员有效期本地存储
 let vipExpire = localStorage.getItem('gameVipTime') || 0;
 const now = Date.now();
+const trialParams = new URLSearchParams(location.search);
+const trialMode = trialParams.get('trial') === '1min' ? '1min' : 'normal';
+const trialKey = trialMode === '1min' ? 'gameTrialStart_1min_' + (trialParams.get('testid') || 'default') : 'gameTrialStart';
+const trialLabel = trialMode === '1min' ? '1分钟测试' : '12小时';
 const trialHours = 12;
-let trialStart = localStorage.getItem('gameTrialStart');
+let trialStart = localStorage.getItem(trialKey);
 if(!trialStart){
   trialStart = now;
-  localStorage.setItem('gameTrialStart', trialStart);
+  localStorage.setItem(trialKey, trialStart);
 }
-const trialMs = trialHours * 60 * 60 * 1000;
+const trialMs = trialMode === '1min' ? 60 * 1000 : trialHours * 60 * 60 * 1000;
 const trialExpired = now - Number(trialStart) >= trialMs;
 // 两套解锁密码（你手动发给客户）
 const monthCode = "game30day";  // 体验价9元
 const yearCode = "game365day"; // 年卡29.9
 
 // 判断是否过期，未付费只显示收款页面
-if(Number(vipExpire) < now && trialExpired){
+if((Number(vipExpire) < now || trialMode === '1min') && trialExpired){
   document.write(`
   <div style="background:#17155c;color:#fff;padding:30px;text-align:center;height:100vh;margin:0;box-sizing:border-box;overflow:auto;">
     <h1>月球救援：英语太空行动</h1>
-    <div style="background:#fff3;color:#ffd343;padding:12px;border-radius:10px;width:300px;margin:15px auto;font-size:17px;font-weight:bold;">免费试玩12小时已结束</div>
+    <div style="background:#fff3;color:#ffd343;padding:12px;border-radius:10px;width:300px;margin:15px auto;font-size:17px;font-weight:bold;">免费试玩${trialLabel}已结束</div>
     <p style="font-size:20px">解锁全部英语关卡，手机平板触屏游玩</p>
     <div style="margin:35px 0;">
       <div style="background:#ffd343;color:#000;padding:15px;border-radius:10px;width:280px;margin:16px auto;font-size:18px;">体验解锁｜9元 / 30天</div>
@@ -58,8 +62,8 @@ function checkPassword(){
 setInterval(function(){
   try{
     let vipExpireNow = Number(localStorage.getItem('gameVipTime') || 0);
-    let trialStartNow = Number(localStorage.getItem('gameTrialStart') || Date.now());
-    if(vipExpireNow < Date.now() && Date.now() - trialStartNow >= trialMs){
+    let trialStartNow = Number(localStorage.getItem(trialKey) || Date.now());
+    if((vipExpireNow < Date.now() || trialMode === '1min') && Date.now() - trialStartNow >= trialMs){
       location.reload();
     }
   }catch(e){}
