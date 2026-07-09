@@ -1,4 +1,73 @@
+<script>
+// 会员有效期本地存储
+let vipExpire = localStorage.getItem('gameVipTime') || 0;
+const now = Date.now();
+const trialParams = new URLSearchParams(location.search);
+const trialMode = trialParams.get('trial') === '1min' ? '1min' : 'normal';
+const trialKey = trialMode === '1min' ? 'gameTrialStart_1min_' + (trialParams.get('testid') || 'default') : 'gameTrialStart';
+const trialLabel = trialMode === '1min' ? '1分钟测试' : '1小时';
+const trialHours = 1;
+let trialStart = localStorage.getItem(trialKey);
+if(!trialStart){
+  trialStart = now;
+  localStorage.setItem(trialKey, trialStart);
+}
+const trialMs = trialMode === '1min' ? 60 * 1000 : trialHours * 60 * 60 * 1000;
+const trialExpired = now - Number(trialStart) >= trialMs;
+// 两套解锁密码（你手动发给客户）
+const monthCode = "game30day";  // 体验价9元
+const yearCode = "game365day"; // 年卡29.9
 
+// 判断是否过期，未付费只显示收款页面
+if((Number(vipExpire) < now || trialMode === '1min') && trialExpired){
+  document.write(`
+  <div style="background:#17155c;color:#fff;padding:30px;text-align:center;height:100vh;margin:0;box-sizing:border-box;overflow:auto;">
+    <h1>月球救援：英语太空行动</h1>
+    <div style="background:#fff3;color:#ffd343;padding:12px;border-radius:10px;width:300px;margin:15px auto;font-size:17px;font-weight:bold;">免费试玩${trialLabel}已结束</div>
+    <p style="font-size:20px">解锁全部英语关卡，手机平板触屏游玩</p>
+    <div style="margin:35px 0;">
+      <div style="background:#ffd343;color:#000;padding:15px;border-radius:10px;width:280px;margin:16px auto;font-size:18px;">体验解锁｜9元 / 30天</div>
+      <div style="background:#5cd097;color:#000;padding:15px;border-radius:10px;width:280px;margin:16px auto;font-size:18px;">添加客服微信，获取继续游戏密码</div>
+    </div>
+    <div style="margin:20px 0;">
+      <p>微信扫码转账，付款后截图发我领取解锁密码</p>
+      <img src="https://github.com/afeidayu666-cyber/3-English/raw/main/WX.jpg" style="width:220px;margin:10px auto;display:block;background:#fff;padding:10px;border-radius:8px;">
+    </div>
+    <div style="margin-top:30px;">
+      <p>输入客服给你的解锁密码，解锁完整游戏</p>
+      <input id="pwdInput" placeholder="输入解锁密码" style="padding:12px;width:260px;font-size:16px;border-radius:8px;border:none;margin-top:10px;">
+      <br>
+      <button onclick="checkPassword()" style="margin-top:15px;padding:12px 30px;font-size:16px;background:#ff8fc7;border:none;border-radius:8px;font-weight:bold;">解锁进入游戏</button>
+    </div>
+    <p style="margin-top:50px;color:#aaa;font-size:14px">客服微信：【facai9facai】<br>提示：更换设备、清理浏览器缓存后需要重新输入密码</p>
+  </div>
+  `);
+}
+
+function checkPassword(){
+  let inputVal = document.getElementById('pwdInput').value.trim();
+  let expireMs;
+  if(inputVal === monthCode){
+    expireMs = Date.now() + 30 * 24 * 60 * 1000;
+  }else if(inputVal === yearCode){
+    expireMs = Date.now() + 365 * 24 * 60 * 1000;
+  }else{
+    alert("密码错误，请核对客服发给你的密码");
+    return;
+  }
+  localStorage.setItem('gameVipTime', expireMs);
+  alert("解锁成功！刷新页面即可开始游戏");
+  location.reload();
+}
+setInterval(function(){
+  try{
+    let vipExpireNow = Number(localStorage.getItem('gameVipTime') || 0);
+    let trialStartNow = Number(localStorage.getItem(trialKey) || Date.now());
+    if((vipExpireNow < Date.now() || trialMode === '1min') && Date.now() - trialStartNow >= trialMs){
+      location.reload();
+    }
+  }catch(e){}
+}, 60000);
 <script>
 // 微信兼容提示 不阻断计时/付费/游戏
 function isWeChat(){
@@ -343,79 +412,4 @@ function resetMission(){let fromCheckpoint=S.chapter>=2&&S.chapterCelebrated;S.x
 function headquarters(){if(S.refills>=2)return resetMission();S.refills++;save();busy=true;let dialogList=activeDialogs(),text=dialogList[Math.floor(Math.random()*dialogList.length)],left=2-S.refills;card.innerHTML=`<span class="tag">🚀 救援太空舱 · 氧气补给 ${S.refills}/2</span><h2>生命维持舱</h2><div class="speech" style="white-space:pre-line">${dialogWithCn(text)}</div><div class="hint">本局补给后还可返回 ${left} 次。先听示范，再按住麦克风读完整段对话。</div><div><button type="button" class="secondary" id="demo">🔊 听示范</button></div><button class="mic" id="mic"><span class="mic-icon">🎙️</span><span class="mic-text">按住补给</span><span class="mic-wave"><span></span><span></span><span></span><span></span></span></button><div id="readState" class="hint">按住麦克风开始，说完松手自动补给</div>`;modal.classList.add('show');bindReliableTap(card.querySelector('#demo'),()=>speak(text.replaceAll(/A:|B:/g,'')));bindHoldToRecord('mic','readState',{listeningText:'正在录音，请按住读完整段对话',evaluate:heard=>{let words=text.toLowerCase().replace(/[^a-z ]/g,' ').split(/\s+/).filter(x=>x.length>2),hit=words.filter(w=>heard.includes(w)).length/words.length;return hit>=.55?{ok:true,good:hit>=.8,successText:hit>=.8?'补给成功，氧气全满':'补给完成，恢复一半氧气'}:{ok:false,failText:'采集到了声音，但对话还不够完整，再按住读一遍'}},onSuccess:result=>heal(result.good)})}
 function heal(good){S.hp=good?5:Math.max(S.hp,2.5);S.fails=0;S.x=320;S.y=Math.max(115,H*.67-25);save();ui();card.innerHTML=`<div class="stars">${good?'★★★':'★★'}</div><h2>${good?'氧气全满！':'恢复到 50%'}</h2><p>${good?'发音清楚、对话完整。':'已经完成补给，再注意连贯和音量。'}</p><button type="button" class="primary" id="go">返回救援任务</button>`;let goBtn=card.querySelector('#go'),goAt=0,leave=e=>{e.preventDefault();let now=Date.now();if(now-goAt<400)return;goAt=now;goBtn.disabled=true;goBtn.textContent='正在返回…';modal.classList.remove('show');busy=false;toast('已返回救援任务')};goBtn.addEventListener('pointerup',leave);goBtn.addEventListener('click',leave)}
 let fallbackVoice=null;function playOnlineVoice(t){try{fallbackVoice?.pause();fallbackVoice=new Audio('https://dict.youdao.com/dictvoice?audio='+encodeURIComponent(t)+'&type=2');fallbackVoice.preload='auto';fallbackVoice.play().catch(()=>toast('示范音播放失败，请检查网络后重试'))}catch{toast('示范音播放失败，请检查网络后重试')}}function speak(t){if(/Android/i.test(navigator.userAgent))return playOnlineVoice(t);let synth=window.speechSynthesis,voices=[];try{voices=synth?.getVoices?.()||[]}catch{}if(!synth||!window.SpeechSynthesisUtterance)return playOnlineVoice(t);try{synth.cancel();let u=new SpeechSynthesisUtterance(t),started=false,fellBack=false;u.lang='en-US';u.rate=.78;u.onstart=()=>started=true;u.onerror=()=>{if(!fellBack){fellBack=true;playOnlineVoice(t)}};synth.speak(u);setTimeout(()=>{if(!started&&!synth.speaking&&!fellBack){fellBack=true;synth.cancel();playOnlineVoice(t)}},900)}catch{playOnlineVoice(t)}}function toast(t){let e=document.querySelector('#toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),1600)}ui();const gameClock=setInterval(()=>loop(performance.now()),MOBILE_SAFE?66:50);loop(performance.now());
-</script>
-<script>
-// 会员有效期本地存储
-let vipExpire = localStorage.getItem('gameVipTime') || 0;
-const now = Date.now();
-const trialParams = new URLSearchParams(location.search);
-const trialMode = trialParams.get('trial') === '1min' ? '1min' : 'normal';
-const trialKey = trialMode === '1min' ? 'gameTrialStart_1min_' + (trialParams.get('testid') || 'default') : 'gameTrialStart';
-const trialLabel = trialMode === '1min' ? '1分钟测试' : '1小时';
-const trialHours = 1;
-let trialStart = localStorage.getItem(trialKey);
-if(!trialStart){
-  trialStart = now;
-  localStorage.setItem(trialKey, trialStart);
-}
-const trialMs = trialMode === '1min' ? 60 * 1000 : trialHours * 60 * 1000;
-const trialExpired = now - Number(trialStart) >= trialMs;
-// 两套解锁密码
-const monthCode = "game30day";
-const yearCode = "game365";
-// 创建遮罩层，不使用document.write销毁页面
-let payMask = document.createElement('div');
-payMask.id = 'payMask';
-payMask.style.cssText = `position:fixed;inset:0;background:#17155c;color:#fff;padding:30px;text-align:center;height:100vh;margin:0;box-sizing:border-box;overflow:auto;z-index:999999;display:none;`;
-payMask.innerHTML = `
-    <h1>月球救援：英语太空行动</h1>
-    <div style="background:#fff3;color:#ffd343;padding:12px;border-radius:10px;width:300px;margin:15px auto;font-size:17px;font-weight:bold;">免费试玩${trialLabel}已结束</div>
-    <p style="font-size:20px">解锁全部英语关卡，手机平板触屏游玩</p>
-    <div style="margin:35px 0;">
-      <div style="background:#ffd343;color:#000;padding:15px;border-radius:10px;width:280px;margin:16px auto;font-size:18px;">体验解锁｜9元 / 30天</div>
-      <div style="background:#5cd097;color:#000;padding:15px;border-radius:10px;width:280px;margin:16px auto;font-size:18px;">添加客服微信，获取继续游戏密码</div>
-    </div>
-    <div style="margin:20px 0;">
-      <p>添加页面底部客服微信私聊转账，付款后客服会下发解锁密码</p>
-    </div>
-    <div style="margin-top:30px;">
-      <p>输入客服给你的解锁密码，解锁完整游戏</p>
-      <input id="pwdInput" placeholder="输入解锁密码" style="padding:12px;width:260px;font-size:16px;border-radius:8px;border:none;margin-top:10px;">
-      <br>
-      <button onclick="checkPassword()" style="margin-top:15px;padding:12px 30px;font-size:16px;background:#ff8fc7;border:none;border-radius:8px;font-weight:bold;">解锁进入游戏</button>
-    </div>
-    <p style="margin-top:50px;color:#aaa;font-size:14px">客服微信：【facai9facai】<br>提示：更换设备、清理浏览器缓存后需要重新输入密码</p>
-`;
-document.body.appendChild(payMask);
-// 判断超时，显示遮罩
-if((Number(vipExpire) < now || trialMode === '1min') && trialExpired){
-  payMask.style.display = 'block';
-}
-function checkPassword(){
-  let inputVal = document.getElementById('pwdInput').value.trim();
-  let expireMs;
-  if(inputVal === monthCode){
-    expireMs = Date.now() + 30 * 24 * 60 * 1000;
-  }else if(inputVal === yearCode){
-    expireMs = Date.now() + 365 * 24 * 1000;
-  }else{
-    alert("密码错误，请核对客服发给你的密码");
-    return;
-  }
-  localStorage.setItem('gameVipTime', expireMs);
-  alert("解锁成功！刷新页面即可开始游戏");
-  location.reload();
-}
-// 每分钟轮询
-setInterval(function(){
-  try{
-    let vipExpireNow = Number(localStorage.getItem('gameVipTime') || 0);
-    let trialStartNow = Number(localStorage.getItem(trialKey) || Date.now());
-    if((vipExpireNow < Date.now() || trialMode === '1min') && Date.now() - trialStartNow >= trialMs){
-      payMask.style.display = 'block';
-    }
-  }catch(e){}
-}, 60000);
-</script>
-</body>
-</html>
+</script></body></html>
