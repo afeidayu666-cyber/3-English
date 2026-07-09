@@ -160,7 +160,7 @@ function guarded(where,fn){try{return fn()}catch(error){reportGameError(where,er
 let courseMode='all';
 function resumeWorld(message){modal.classList.remove('show');busy=false;last=0;if(message)toast(message)}
 function bindReliableTap(el,fn){if(!el)return;let used=false;el.style.touchAction='manipulation';el.addEventListener('click',e=>{if(used)return;e.preventDefault();used=true;try{fn(e)}finally{setTimeout(()=>used=false,350)}})}
-function prepareModeStart(mode){courseMode=mode;keys={};letterBullets=[];autoDoorId=null;autoEncounterId=null;S.hp=5;S.fails=0;S.refills=0;S.gun=false;S.weapon=false;S.weaponMode='freeze';S.chapter=1;S.chapterCelebrated=false;S.cleared=[];S.x=320;S.y=Math.max(115,(H||640)*.67-25);objects=objects.filter(o=>!o.ambush);objects.forEach(o=>{o.phase=0;o.frozenUntil=0;o.respawnAt=0;o.attackAt=0;if(o.home)o.x=o.home});save();ui()}
+function prepareModeStart(mode){courseMode=mode;keys={};letterBullets=[];autoDoorId=null;autoEncounterId=null;S.hp=5;S.fails=0;S.refills=0;S.gun=false;S.weapon=false;S.weaponMode='freeze';S.chapter=1;S.chapterCelebrated=false;S.cleared=[];S.x=320;S.y=Math.max(115,(H||640)*.67-25);for(let i=objects.length-1;i>=0;i--){if(objects[i].ambush)objects.splice(i,1)}objects.forEach(o=>{o.phase=0;o.frozenUntil=0;o.respawnAt=0;o.attackAt=0;if(o.home)o.x=o.home});save();ui()}
 function startWithMode(mode){document.querySelector('#startGuide').classList.add('hide');resize();prepareModeStart(mode);toast(mode==='preview4'?'已进入四年级预习模式：只跟读四上单词和对话':'已进入三年级复习模式：只出三上三下内容')}
 document.querySelector('#startGame').addEventListener('click',()=>startWithMode('review3'));
 document.querySelector('#startPreview4').addEventListener('click',()=>startWithMode('preview4'));
