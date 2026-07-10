@@ -5,18 +5,18 @@ const now = Date.now();
 const trialParams = new URLSearchParams(location.search);
 const trialMode = trialParams.get('trial') === '1min' ? '1min' : 'normal';
 const trialKey = trialMode === '1min' ? 'gameTrialStart_1min_' + (trialParams.get('testid') || 'default') : 'gameTrialStart';
-const trialLabel = trialMode === '1min' ? '1分钟测试' : '1小时';
-const trialHours = 1;
+const trialLabel = trialMode === '1min' ? '1分钟测试' : '15分钟';
+const trialMinutes = 15;
 let trialStart = localStorage.getItem(trialKey);
 if(!trialStart){
   trialStart = now;
   localStorage.setItem(trialKey, trialStart);
 }
-const trialMs = trialMode === '1min' ? 60 * 1000 : trialHours * 60 * 60 * 1000;
+const trialMs = trialMode === '1min' ? 60 * 1000 : trialMinutes * 60 * 1000;
 const trialExpired = now - Number(trialStart) >= trialMs;
 // 客服解锁密码（你手动发给客户）
-const monthCode = "game30day";  // 19.9 永久使用
-const yearCode = "game365day";  // 兼容旧密码，也按永久处理
+const monthCode = "game30day";  // 19.9 一年服务
+const yearCode = "game365day";  // 兼容旧密码，也按一年服务处理
 
 function showPaywall(){
   if(document.getElementById('paywallMask')) return;
@@ -27,7 +27,7 @@ function showPaywall(){
     <p style="font-size:20px;line-height:1.6;">添加客服微信，获取继续游戏密码</p>
     <div style="background:#ffd343;color:#000;padding:16px;border-radius:12px;width:290px;max-width:90%;margin:24px auto;font-size:20px;font-weight:900;">19.9 元｜永久使用</div>
     <div style="background:#fff;color:#17155c;padding:16px;border-radius:12px;width:290px;max-width:90%;margin:18px auto;font-size:22px;font-weight:900;">客服微信：facai9facai</div>
-    <button onclick="navigator.clipboard&&navigator.clipboard.writeText('faicai9facai');alert('客服微信已复制')" style="padding:12px 22px;border:none;border-radius:10px;background:#5cd097;color:#000;font-size:16px;font-weight:bold;">复制客服微信</button>
+    <button onclick="navigator.clipboard&&navigator.clipboard.writeText('facai9facai');alert('客服微信已复制')" style="padding:12px 22px;border:none;border-radius:10px;background:#5cd097;color:#000;font-size:16px;font-weight:bold;">复制客服微信</button>
     <div style="margin-top:28px;">
       <p>输入客服给你的解锁密码，继续使用完整游戏</p>
       <input id="pwdInput" placeholder="输入解锁密码" style="padding:12px;width:260px;max-width:86%;font-size:16px;border-radius:8px;border:none;margin-top:10px;">
@@ -67,6 +67,85 @@ setInterval(function(){
     }
   }catch(e){}
 }, 60000);
+</script>
+<script>
+// 最终覆盖版：15分钟试玩 + 客服微信 faicai9facai + 19.9 一年服务。
+// 这段放在旧试用逻辑后面，强制接管弹窗与到期检查，避免旧缓存/旧文案继续生效。
+(function(){
+  const finalTrialParams = new URLSearchParams(location.search);
+  const finalTrialMode = finalTrialParams.get('trial') === '1min' ? '1min' : 'normal';
+  const finalTrialKey = finalTrialMode === '1min'
+    ? 'gameTrialStart_1min_' + (finalTrialParams.get('testid') || 'default')
+    : 'gameTrialStart';
+  const finalTrialMs = finalTrialMode === '1min' ? 60 * 1000 : 15 * 60 * 1000;
+  const finalTrialLabel = finalTrialMode === '1min' ? '1分钟测试' : '15分钟';
+  const finalWechat = 'faicai9facai';
+  let finalTrialStart = Number(localStorage.getItem(finalTrialKey) || 0);
+  if(!finalTrialStart){
+    finalTrialStart = Date.now();
+    localStorage.setItem(finalTrialKey, String(finalTrialStart));
+  }
+
+  window.shouldShowPaywall = function(){
+    const vipExpireNow = Number(localStorage.getItem('gameVipTime') || 0);
+    const trialStartNow = Number(localStorage.getItem(finalTrialKey) || finalTrialStart || Date.now());
+    return (vipExpireNow < Date.now() || finalTrialMode === '1min') && Date.now() - trialStartNow >= finalTrialMs;
+  };
+
+  window.showPaywall = function(){
+    const old = document.getElementById('paywallMask');
+    if(old) old.remove();
+    document.documentElement.style.overflow = 'hidden';
+    if(document.body) document.body.style.overflow = 'hidden';
+    const html = `
+    <div id="paywallMask" style="position:fixed;inset:0;z-index:999999;background:#17155c;color:#fff;padding:30px;text-align:center;box-sizing:border-box;overflow:auto;font-family:Microsoft YaHei,system-ui,sans-serif;">
+      <h1 style="margin-top:20px;">月球救援：英语太空行动</h1>
+      <div style="background:#fff3;color:#ffd343;padding:12px;border-radius:10px;width:300px;max-width:90%;margin:15px auto;font-size:17px;font-weight:bold;">免费试玩${finalTrialLabel}已结束</div>
+      <p style="font-size:20px;line-height:1.6;">添加客服微信，获取继续游戏密码</p>
+      <div style="background:#ffd343;color:#000;padding:16px;border-radius:12px;width:290px;max-width:90%;margin:24px auto;font-size:20px;font-weight:900;">19.9 元｜一年服务</div>
+      <div style="background:#fff;color:#17155c;padding:16px;border-radius:12px;width:290px;max-width:90%;margin:18px auto;font-size:22px;font-weight:900;">客服微信：${finalWechat}</div>
+      <button type="button" onclick="navigator.clipboard&&navigator.clipboard.writeText('${finalWechat}');alert('客服微信已复制')" style="padding:12px 22px;border:none;border-radius:10px;background:#5cd097;color:#000;font-size:16px;font-weight:bold;">复制客服微信</button>
+      <div style="margin-top:28px;">
+        <p>输入客服给你的解锁密码，继续使用完整游戏</p>
+        <input id="pwdInput" placeholder="输入解锁密码" style="padding:12px;width:260px;max-width:86%;font-size:16px;border-radius:8px;border:none;margin-top:10px;">
+        <br>
+        <button type="button" onclick="checkPassword()" style="margin-top:15px;padding:12px 30px;font-size:16px;background:#ff8fc7;border:none;border-radius:8px;font-weight:bold;">解锁进入游戏</button>
+      </div>
+      <p style="margin-top:40px;color:#ccc;font-size:14px;line-height:1.7;">同一浏览器会自动记录试玩时间；到期后重新打开也会显示本界面。<br>更换设备、清理浏览器缓存后需要重新输入密码。</p>
+    </div>`;
+    if(document.body) document.body.insertAdjacentHTML('beforeend', html);
+    else document.addEventListener('DOMContentLoaded', () => window.showPaywall(), {once:true});
+  };
+
+  window.checkPassword = function(){
+    const input = document.getElementById('pwdInput');
+    const inputVal = input ? input.value.trim() : '';
+    if(inputVal !== 'game30day' && inputVal !== 'game365day'){
+      alert('密码错误，请核对客服发给你的密码');
+      return;
+    }
+    localStorage.setItem('gameVipTime', String(Date.now() + 365 * 24 * 60 * 60 * 1000));
+    alert('解锁成功！一年服务已开启，刷新后即可继续游戏。');
+    location.reload();
+  };
+
+  window.enforcePaywall = function(){
+    try{
+      if(window.shouldShowPaywall()) window.showPaywall();
+    }catch(e){
+      console.error('paywall check failed', e);
+    }
+  };
+
+  window.enforcePaywall();
+  document.addEventListener('DOMContentLoaded', window.enforcePaywall);
+  window.addEventListener('pageshow', window.enforcePaywall);
+  window.addEventListener('focus', window.enforcePaywall);
+  document.addEventListener('visibilitychange', () => {
+    if(!document.hidden) window.enforcePaywall();
+  });
+  setInterval(window.enforcePaywall, 3000);
+})();
 </script>
 <script>
 // 微信环境检测与浏览器跳转提示
