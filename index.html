@@ -103,6 +103,7 @@ setInterval(function(){
   };
 
   window.showPaywall = function(){
+    if(typeof window.trackGameEvent==='function')window.trackGameEvent('paywall_show',finalTrialMode);
     try{
       localStorage.setItem('gameTrialExpiredLock','1');
       localStorage.removeItem('pencil-island-save');
@@ -141,6 +142,7 @@ setInterval(function(){
     localStorage.setItem('gameVipTime', String(Date.now() + 365 * 24 * 60 * 60 * 1000));
     localStorage.setItem('gamePaidUnlockV2','1');
     localStorage.removeItem('gameTrialExpiredLock');
+    if(typeof window.trackGameEvent==='function')window.trackGameEvent('unlock_success','one_year');
     alert('解锁成功！一年服务已开启，刷新后即可继续游戏。');
     location.reload();
   };
@@ -257,7 +259,28 @@ body{display:block;background:#11175a}
   .dungeon-arena{height:230px}.dungeon-player{font-size:39px}.dungeon-boss{font-size:56px}.dungeon-controls button{padding:5px 9px;font-size:11px}
 }
 .modal.dungeon-mode .dungeon-player,.modal.dungeon-mode .dungeon-boss{filter:none!important;transition:top .18s,opacity .18s!important}.modal.dungeon-mode .letter-shot{box-shadow:none!important;transition:right 1.8s linear!important}.modal.dungeon-mode .dungeon-flash{animation:none!important}
-</style></head>
+</style>
+<script>
+// 访问统计入口：把百度统计 ID 填到 BAIDU_TONGJI_ID 后即可启用。
+// 百度统计后台创建站点后，会给 hm.js? 后面一串字符，把那串字符填进来。
+window.BAIDU_TONGJI_ID = window.BAIDU_TONGJI_ID || '';
+window._hmt = window._hmt || [];
+window.trackGameEvent = function(action,label){
+  try{
+    window._hmt.push(['_trackEvent','moon_english_game',action,label||'']);
+  }catch(e){}
+};
+(function(){
+  if(!window.BAIDU_TONGJI_ID)return;
+  var hm=document.createElement('script');
+  hm.async=true;
+  hm.src='https://hm.baidu.com/hm.js?'+window.BAIDU_TONGJI_ID;
+  var s=document.getElementsByTagName('script')[0];
+  s.parentNode.insertBefore(hm,s);
+})();
+document.addEventListener('DOMContentLoaded',function(){window.trackGameEvent('page_open','game_home')});
+</script>
+</head>
 <body><section class="start-guide" id="startGuide"><div class="start-guide-card"><div class="start-guide-logo">🚀</div><h1>月球英语救援</h1><div class="start-guide-sub">请在手机浏览器中打开游戏</div><div class="browser-guides"><div class="browser-guide android"><span class="browser-icon">🤖</span>安卓手机<small>建议使用 Edge 浏览器</small></div><div class="browser-guide ios"><span class="browser-icon">🍎</span>苹果手机<small>使用自带 Safari 浏览器</small></div></div><div class="start-guide-tip">首次录音时，请点击“允许使用麦克风”<br>微信内打开可能无法正常识别语音</div><div class="start-actions"><button class="start-game" id="startGame">开始游戏<small>只复习三年级上册 + 下册</small></button><button class="start-game preview" id="startPreview4">四年级预习<small>只练 PEP 四上单词和对话</small></button></div></div></section><div class="rotate-mask" id="rotateMask"><div class="rotate-card"><div class="rotate-phone">📱</div><div class="rotate-title">请横屏开始</div><div class="rotate-tip">请打开手机自动旋转，再把手机横过来。</div><button class="rotate-start" id="rotateStart">我已横屏，刷新画面</button><div class="rotate-mini">微信里请点右上角“…”并选择在浏览器打开</div></div></div><div class="game-shell"><main id="game"><canvas id="c"></canvas><canvas id="heroCanvas"></canvas>
 <div class="hud"><div class="pill hp">氧气 <b id="hpText">5/5</b><div class="bar"><div class="fill" id="hpFill"></div></div></div><div class="pill">⭐ <span id="xp">0</span></div><div class="pill" id="weapon">👊 徒手</div><div class="pill">补给 <span id="refill">0/2</span></div><div class="pill">环节 <span id="chapter">1</span></div><div class="pill">等级 <span id="level">1</span></div><div class="pill stage" id="zone">地球轨道</div></div>
 <div class="tip" id="tip">跟着黄色箭头走，靠近发光门会自动出现单词</div>
@@ -294,8 +317,8 @@ function resumeWorld(message){modal.classList.remove('show');busy=false;last=0;i
 function bindReliableTap(el,fn){if(!el)return;let used=false;el.style.touchAction='manipulation';el.addEventListener('click',e=>{if(used)return;e.preventDefault();used=true;try{fn(e)}finally{setTimeout(()=>used=false,350)}})}
 function prepareModeStart(mode,opt={}){courseMode=mode;if(mode==='preview4'){if(opt.next)S.previewRound=((S.previewRound||0)+1)%PREVIEW_THEMES.length;if(opt.resetRound)S.previewRound=0}else{if(opt.next)S.reviewRound=((S.reviewRound||0)+1)%REVIEW_ROUNDS.length;if(opt.resetRound)S.reviewRound=0}keys={};letterBullets=[];autoDoorId=null;autoEncounterId=null;S.hp=5;S.fails=0;S.refills=0;S.gun=false;S.weapon=false;S.weaponMode='freeze';S.chapter=1;S.chapterCelebrated=false;S.cleared=[];S.x=320;S.y=Math.max(115,(H||640)*.67-25);for(let i=objects.length-1;i>=0;i--){if(objects[i].ambush)objects.splice(i,1)}let round=playRound();objects.forEach((o,i)=>{o.baseX??=o.home||o.x;o.baseY??=o.y;o.phase=0;o.frozenUntil=0;o.respawnAt=0;o.attackAt=0;if(o.k==='monster'||o.k==='boss'){let shift=((round*73+i*31)%170)-85;o.home=o.baseX+shift;o.x=o.home;o.y=Math.max(130,Math.min((H||640)*.66,o.baseY+(((round+i)%3)-1)*28))}else if(o.home)o.x=o.home});save();ui()}
 function startWithMode(mode){document.querySelector('#startGuide').classList.add('hide');resize();prepareModeStart(mode,{resetRound:true});toast(mode==='preview4'?'已进入四年级预习模式：'+previewTheme().short+'，只跟读四上单词和对话':'已进入三年级复习模式：'+REVIEW_ROUNDS[S.reviewRound||0])}
-document.querySelector('#startGame').addEventListener('click',()=>startWithMode('review3'));
-document.querySelector('#startPreview4').addEventListener('click',()=>startWithMode('preview4'));
+document.querySelector('#startGame').addEventListener('click',()=>{if(typeof window.trackGameEvent==='function')window.trackGameEvent('start_mode','review3');startWithMode('review3')});
+document.querySelector('#startPreview4').addEventListener('click',()=>{if(typeof window.trackGameEvent==='function')window.trackGameEvent('start_mode','preview4');startWithMode('preview4')});
 ['skillListen','enterChapter','action','secretListen','eatMushroom','takeGun','listen','again','oneShot','defeatNow','restartMission','demo','go','hpText','hpFill','xp','weapon','zone'].forEach(id=>{try{Object.defineProperty(window,id,{configurable:true,get:()=>document.getElementById(id)})}catch{}});
 function exitCabinMission(){stopCabinBattle();cabin.active=false;modal.classList.remove('show','dungeon-mode');card.innerHTML='';busy=false;setEarthAction();toast('已离开太空舱副本，返回主画面')}
 modal.addEventListener('pointerup',e=>{if(e.target.closest?.('#leaveCabin')){e.preventDefault();exitCabinMission()}},true);modal.addEventListener('click',e=>{if(e.target.closest?.('#leaveCabin')){e.preventDefault();exitCabinMission()}},true);
