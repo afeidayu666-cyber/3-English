@@ -85,14 +85,24 @@ setInterval(function(){
     finalTrialStart = Date.now();
     localStorage.setItem(finalTrialKey, String(finalTrialStart));
   }
+  const deviceInitKey = 'moonGameDeviceInit_v4';
+  if(!localStorage.getItem(deviceInitKey)){
+    localStorage.removeItem('pencil-island-save');
+    localStorage.setItem(deviceInitKey, String(Date.now()));
+  }
 
   window.shouldShowPaywall = function(){
     const vipExpireNow = Number(localStorage.getItem('gameVipTime') || 0);
     const trialStartNow = Number(localStorage.getItem(finalTrialKey) || finalTrialStart || Date.now());
-    return (vipExpireNow < Date.now() || finalTrialMode === '1min') && Date.now() - trialStartNow >= finalTrialMs;
+    const trialLocked = localStorage.getItem('gameTrialExpiredLock') === '1';
+    return (vipExpireNow < Date.now() || finalTrialMode === '1min') && (trialLocked || Date.now() - trialStartNow >= finalTrialMs);
   };
 
   window.showPaywall = function(){
+    try{
+      localStorage.setItem('gameTrialExpiredLock','1');
+      localStorage.removeItem('pencil-island-save');
+    }catch(e){}
     const old = document.getElementById('paywallMask');
     if(old) old.remove();
     document.documentElement.style.overflow = 'hidden';
@@ -125,6 +135,7 @@ setInterval(function(){
       return;
     }
     localStorage.setItem('gameVipTime', String(Date.now() + 365 * 24 * 60 * 60 * 1000));
+    localStorage.removeItem('gameTrialExpiredLock');
     alert('解锁成功！一年服务已开启，刷新后即可继续游戏。');
     location.reload();
   };
