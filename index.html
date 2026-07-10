@@ -90,12 +90,16 @@ setInterval(function(){
     localStorage.removeItem('pencil-island-save');
     localStorage.setItem(deviceInitKey, String(Date.now()));
   }
+  if(localStorage.getItem('gamePaidUnlockV2') !== '1'){
+    localStorage.removeItem('gameVipTime');
+  }
 
   window.shouldShowPaywall = function(){
     const vipExpireNow = Number(localStorage.getItem('gameVipTime') || 0);
+    const paidUnlock = localStorage.getItem('gamePaidUnlockV2') === '1';
     const trialStartNow = Number(localStorage.getItem(finalTrialKey) || finalTrialStart || Date.now());
     const trialLocked = localStorage.getItem('gameTrialExpiredLock') === '1';
-    return (vipExpireNow < Date.now() || finalTrialMode === '1min') && (trialLocked || Date.now() - trialStartNow >= finalTrialMs);
+    return (!paidUnlock || vipExpireNow < Date.now() || finalTrialMode === '1min') && (trialLocked || Date.now() - trialStartNow >= finalTrialMs);
   };
 
   window.showPaywall = function(){
@@ -135,6 +139,7 @@ setInterval(function(){
       return;
     }
     localStorage.setItem('gameVipTime', String(Date.now() + 365 * 24 * 60 * 60 * 1000));
+    localStorage.setItem('gamePaidUnlockV2','1');
     localStorage.removeItem('gameTrialExpiredLock');
     alert('解锁成功！一年服务已开启，刷新后即可继续游戏。');
     location.reload();
