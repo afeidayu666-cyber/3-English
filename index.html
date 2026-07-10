@@ -5,7 +5,7 @@ const now = Date.now();
 const trialParams = new URLSearchParams(location.search);
 const trialMode = trialParams.get('trial') === '1min' ? '1min' : 'normal';
 const trialKey = trialMode === '1min' ? 'gameTrialStart_1min_' + (trialParams.get('testid') || 'default') : 'gameTrialStart';
-const trialLabel = trialMode === '1min' ? '1分钟测试' : '15分钟';
+const trialLabel = trialMode === '1min' ? '1分钟测试' : '10分钟';
 const trialMinutes = 15;
 let trialStart = localStorage.getItem(trialKey);
 if(!trialStart){
@@ -69,7 +69,7 @@ setInterval(function(){
 }, 60000);
 </script>
 <script>
-// 最终覆盖版：15分钟试玩 + 客服微信 faicai9facai + 19.9 一年服务。
+// 最终覆盖版：10分钟试玩 + 客服微信 faicai9facai + 19.9 一年服务。
 // 这段放在旧试用逻辑后面，强制接管弹窗与到期检查，避免旧缓存/旧文案继续生效。
 (function(){
   const finalTrialParams = new URLSearchParams(location.search);
@@ -77,8 +77,8 @@ setInterval(function(){
   const finalTrialKey = finalTrialMode === '1min'
     ? 'gameTrialStart_1min_' + (finalTrialParams.get('testid') || 'default')
     : 'gameTrialStart';
-  const finalTrialMs = finalTrialMode === '1min' ? 60 * 1000 : 15 * 60 * 1000;
-  const finalTrialLabel = finalTrialMode === '1min' ? '1分钟测试' : '15分钟';
+  const finalTrialMs = finalTrialMode === '1min' ? 60 * 1000 : 10 * 60 * 1000;
+  const finalTrialLabel = finalTrialMode === '1min' ? '1分钟测试' : '10分钟';
   const finalWechat = 'faicai9facai';
   let finalTrialStart = Number(localStorage.getItem(finalTrialKey) || 0);
   if(!finalTrialStart){
@@ -263,7 +263,7 @@ body{display:block;background:#11175a}
 <script>
 // 访问统计入口：把百度统计 ID 填到 BAIDU_TONGJI_ID 后即可启用。
 // 百度统计后台创建站点后，会给 hm.js? 后面一串字符，把那串字符填进来。
-window.BAIDU_TONGJI_ID = window.BAIDU_TONGJI_ID || '';
+window.BAIDU_TONGJI_ID = window.BAIDU_TONGJI_ID || 'ec2817541f3c41bd0920b0d38bd77a38';
 window._hmt = window._hmt || [];
 window.trackGameEvent = function(action,label){
   try{
