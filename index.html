@@ -85,7 +85,7 @@ setInterval(function(){
     finalTrialStart = Date.now();
     localStorage.setItem(finalTrialKey, String(finalTrialStart));
   }
-  const deviceInitKey = 'moonGameDeviceInit_v4';
+  const deviceInitKey = 'moonGameDeviceInit_v5';
   if(!localStorage.getItem(deviceInitKey)){
     localStorage.removeItem('pencil-island-save');
     localStorage.setItem(deviceInitKey, String(Date.now()));
@@ -301,6 +301,7 @@ function exitCabinMission(){stopCabinBattle();cabin.active=false;modal.classList
 modal.addEventListener('pointerup',e=>{if(e.target.closest?.('#leaveCabin')){e.preventDefault();exitCabinMission()}},true);modal.addEventListener('click',e=>{if(e.target.closest?.('#leaveCabin')){e.preventDefault();exitCabinMission()}},true);
 let dungeonControlAt=0;function handleDungeonControl(e){let b=e.target.closest?.('#dungeonAttack,#dungeonUp,#dungeonDown');if(!b)return;e.preventDefault();e.stopImmediatePropagation();let now=Date.now();if(now-dungeonControlAt<180)return;dungeonControlAt=now;if(b.id==='dungeonAttack')attackCabinBoss();else moveCabinPlayer(b.id==='dungeonUp'?-1:1)}modal.addEventListener('pointerup',handleDungeonControl,true);modal.addEventListener('click',handleDungeonControl,true);
 let W,H,dpr=1,sceneScale=1,keys={},touchTarget=null,touchPointer=null,near=null,busy=false,last=0,invincible=0,dash=0,shake=0,audio=null,musicOn=false,musicTimer=null,autoDoorId=null,autoEncounterId=null,iceBeam=null,freezeTargetId=null,letterBullets=[],nextLetterShot=0,shockLessonTarget=null,shockWave=null,dodgeReadyAt=0,dodgeBurstUntil=0,jumpUntil=0,secretJumps=0,lastSecretJump=0,secretOpened=false,shieldUntil=0,nextAmbushAt=Date.now()+10000,ambushSeq=0,missingGuideAt=0;
+let openingSafeUntil=Date.now()+8000;
 const bank=[
  {grade:'三上',type:'spell',cn:'尺子',word:'ruler',hint:'r 开头，5个字母'},
  {grade:'三上',type:'talk',q:'Good morning!',options:['Good morning!','Good night!','I am a pencil.'],a:0},
@@ -351,6 +352,8 @@ objects.push(
  {id:'seaCrawl1',x:2220,y:140,k:'monster',kind:'bookslime',label:'海底寄居怪',vx:.026,home:2220,range:80,lane:'ground'},
  {id:'seaCrawl2',x:2920,y:140,k:'monster',kind:'bookslime',label:'珊瑚爬虫',vx:-.027,home:2920,range:90,lane:'ground'}
 );
+function applyOpeningCrawlSafeZone(){[['crawl1',1120,.022,65],['crawl2',1450,-.024,70]].forEach(([id,x,vx,range])=>{let o=objects.find(v=>v.id===id);if(o){o.x=x;o.home=x;o.vx=vx;o.range=range}})}
+applyOpeningCrawlSafeZone();
 let wallToastAt=0;
 const cabin={active:false,phase:0,progress:0,hits:0,lane:1,attacks:0,burstHits:0,run:0,letterTimer:0,phaseTimer:0,clockTimer:0,bulletTimers:new Set(),lastAttackAt:0};
 function stopCabinBattle(){cabin.run++;clearInterval(cabin.letterTimer);clearInterval(cabin.clockTimer);clearTimeout(cabin.phaseTimer);cabin.letterTimer=0;cabin.clockTimer=0;cabin.phaseTimer=0;cabin.bulletTimers.forEach(clearTimeout);cabin.bulletTimers.clear();document.querySelectorAll('.letter-shot').forEach(e=>e.remove())}
