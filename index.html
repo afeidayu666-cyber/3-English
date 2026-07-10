@@ -322,6 +322,8 @@ const objects=[{id:'home',x:270,y:350,k:'home',label:'救援太空舱'},{id:'doo
 {id:'door2',x:1150,y:210,k:'door',mode:'dialogue',label:'火星暗号站',q:9},{id:'m2',x:1260,y:455,k:'monster',kind:'devil',label:'火星小恶魔',q:3,vx:-.045,home:1260,range:115},{id:'m2b',x:1410,y:305,k:'monster',kind:'bookslime',label:'陨石史莱姆',q:5,vx:.035,home:1410,range:75},
 {id:'chest',x:1510,y:225,k:'door',label:'月球补给箱',q:6},{id:'moonTower',x:1640,y:185,k:'door',mode:'dialogue',label:'月球通讯塔',q:7},{id:'m3',x:1610,y:450,k:'monster',kind:'pen',label:'月面巡逻兵',q:8,vx:.05,home:1610,range:100},{id:'m3b',x:1740,y:290,k:'monster',kind:'devil',label:'暗影外星人',q:6,vx:-.052,home:1740,range:75},{id:'boss',x:1840,y:410,k:'boss',kind:'dragon',label:'月球守卫',q:7,vx:.055,home:1840,range:75}];
 const rocks=[{x:520,y:330,r:30},{x:760,y:455,r:34},{x:1010,y:350,r:28},{x:1210,y:180,r:34},{x:1450,y:410,r:31},{x:1640,y:300,r:38}];
+function applyOpeningSafeZone(){[['m1',1160,385,.035,85],['m1b',1380,285,-.04,80]].forEach(([id,x,y,vx,range])=>{let o=objects.find(v=>v.id===id);if(o){o.x=x;o.home=x;o.y=y;o.vx=vx;o.range=range}})}
+applyOpeningSafeZone();
 const LEVELS=[
  {name:'第一关·月球救援',from:0,to:1900,sky1:'#102b78',sky2:'#315ed1',sky3:'#56a5e8',hill:'#d4d9e5',ground:'#aeb9ca',need:3},
  {name:'第二关·海底世界',from:1900,to:3500,sky1:'#063d7a',sky2:'#087fba',sky3:'#38d7df',hill:'#39c6ad',ground:'#147c84',need:3},
