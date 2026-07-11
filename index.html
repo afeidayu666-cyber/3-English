@@ -40,8 +40,8 @@ function showPaywall(){
   else document.addEventListener('DOMContentLoaded', () => showPaywall(), {once:true});
 }
 
-// 判断是否过期，过期后直接弹客服微信，不清空游戏页面
-if((Number(vipExpire) < now || trialMode === '1min') && trialExpired){
+// 旧版按时间到期逻辑已停用：现在改为第一关免费，进入第二轮开始收费。
+if(false && (Number(vipExpire) < now || trialMode === '1min') && trialExpired){
   showPaywall();
 }
 
@@ -62,15 +62,15 @@ setInterval(function(){
   try{
     let vipExpireNow = Number(localStorage.getItem('gameVipTime') || 0);
     let trialStartNow = Number(localStorage.getItem(trialKey) || Date.now());
-    if((vipExpireNow < Date.now() || trialMode === '1min') && Date.now() - trialStartNow >= trialMs){
+    if(false && (vipExpireNow < Date.now() || trialMode === '1min') && Date.now() - trialStartNow >= trialMs){
       showPaywall();
     }
   }catch(e){}
 }, 60000);
 </script>
 <script>
-// 最终覆盖版：10分钟试玩 + 客服微信 faicai9facai + 19.9 一年服务。
-// 这段放在旧试用逻辑后面，强制接管弹窗与到期检查，避免旧缓存/旧文案继续生效。
+// 最终覆盖版：第一关免费试玩，进入第二轮开始收费 + 客服微信 faicai9facai + 19.9 一年服务。
+// 这段放在旧试用逻辑后面，强制接管弹窗与收费检查，避免旧缓存/旧文案继续生效。
 (function(){
   const finalTrialParams = new URLSearchParams(location.search);
   const finalTrialMode = finalTrialParams.get('trial') === '1min' ? '1min' : 'normal';
@@ -78,7 +78,7 @@ setInterval(function(){
     ? 'gameTrialStart_1min_' + (finalTrialParams.get('testid') || 'default')
     : 'gameTrialStart';
   const finalTrialMs = finalTrialMode === '1min' ? 60 * 1000 : 10 * 60 * 1000;
-  const finalTrialLabel = finalTrialMode === '1min' ? '1分钟测试' : '10分钟';
+  const finalTrialLabel = '第一关免费体验';
   const finalWechat = 'faicai9facai';
   let finalTrialStart = Number(localStorage.getItem(finalTrialKey) || 0);
   if(!finalTrialStart){
@@ -97,16 +97,25 @@ setInterval(function(){
   window.shouldShowPaywall = function(){
     const vipExpireNow = Number(localStorage.getItem('gameVipTime') || 0);
     const paidUnlock = localStorage.getItem('gamePaidUnlockV2') === '1';
-    const trialStartNow = Number(localStorage.getItem(finalTrialKey) || finalTrialStart || Date.now());
-    const trialLocked = localStorage.getItem('gameTrialExpiredLock') === '1';
-    return (!paidUnlock || vipExpireNow < Date.now() || finalTrialMode === '1min') && (trialLocked || Date.now() - trialStartNow >= finalTrialMs);
+    const firstRoundDone = localStorage.getItem('gameFirstRoundFreeDone') === '1';
+    return (!paidUnlock || vipExpireNow < Date.now()) && firstRoundDone;
   };
 
-  window.showPaywall = function(){
-    if(typeof window.trackGameEvent==='function')window.trackGameEvent('paywall_show',finalTrialMode);
+  window.hasFullAccess = function(){
+    return localStorage.getItem('gamePaidUnlockV2') === '1' && Number(localStorage.getItem('gameVipTime') || 0) >= Date.now();
+  };
+
+  window.requireFullAccess = function(reason){
+    if(window.hasFullAccess()) return true;
+    try{localStorage.setItem('gameFirstRoundFreeDone','1')}catch(e){}
+    window.showPaywall(reason || '第一关免费体验已完成');
+    return false;
+  };
+
+  window.showPaywall = function(reason){
+    if(typeof window.trackGameEvent==='function')window.trackGameEvent('paywall_show',reason || 'first_round_done');
     try{
-      localStorage.setItem('gameTrialExpiredLock','1');
-      localStorage.removeItem('pencil-island-save');
+      localStorage.setItem('gameFirstRoundFreeDone','1');
     }catch(e){}
     const old = document.getElementById('paywallMask');
     if(old) old.remove();
@@ -115,8 +124,15 @@ setInterval(function(){
     const html = `
     <div id="paywallMask" style="position:fixed;inset:0;z-index:999999;background:#17155c;color:#fff;padding:30px;text-align:center;box-sizing:border-box;overflow:auto;font-family:Microsoft YaHei,system-ui,sans-serif;">
       <h1 style="margin-top:20px;">月球救援：英语太空行动</h1>
-      <div style="background:#fff3;color:#ffd343;padding:12px;border-radius:10px;width:300px;max-width:90%;margin:15px auto;font-size:17px;font-weight:bold;">免费试玩${finalTrialLabel}已结束</div>
-      <p style="font-size:20px;line-height:1.6;">添加客服微信，获取继续游戏密码</p>
+      <div style="background:#fff3;color:#ffd343;padding:12px;border-radius:10px;width:330px;max-width:92%;margin:15px auto;font-size:17px;font-weight:bold;">免费体验关卡已完成</div>
+      <p style="font-size:20px;line-height:1.6;">孩子已经体验完第一关。完整版解锁后续地图和全部课本内容。</p>
+      <div style="background:#fff;color:#17155c;padding:14px;border-radius:12px;width:360px;max-width:92%;margin:18px auto;font-size:16px;line-height:1.7;text-align:left;">
+        ✅ 三年级上册 + 下册复习<br>
+        ✅ 四年级上册预习<br>
+        ✅ 森林探秘 / 地下寻宝 / 博物馆寻宝 / 海底世界等后续关卡<br>
+        ✅ 后续更新继续使用
+      </div>
+      <p style="font-size:19px;line-height:1.6;">添加客服微信，获取继续游戏密码</p>
       <div style="background:#ffd343;color:#000;padding:16px;border-radius:12px;width:290px;max-width:90%;margin:24px auto;font-size:20px;font-weight:900;">19.9 元｜一年服务</div>
       <div style="background:#fff;color:#17155c;padding:16px;border-radius:12px;width:290px;max-width:90%;margin:18px auto;font-size:22px;font-weight:900;">客服微信：${finalWechat}</div>
       <button type="button" onclick="navigator.clipboard&&navigator.clipboard.writeText('${finalWechat}');alert('客服微信已复制')" style="padding:12px 22px;border:none;border-radius:10px;background:#5cd097;color:#000;font-size:16px;font-weight:bold;">复制客服微信</button>
@@ -126,7 +142,7 @@ setInterval(function(){
         <br>
         <button type="button" onclick="checkPassword()" style="margin-top:15px;padding:12px 30px;font-size:16px;background:#ff8fc7;border:none;border-radius:8px;font-weight:bold;">解锁进入游戏</button>
       </div>
-      <p style="margin-top:40px;color:#ccc;font-size:14px;line-height:1.7;">同一浏览器会自动记录试玩时间；到期后重新打开也会显示本界面。<br>更换设备、清理浏览器缓存后需要重新输入密码。</p>
+      <p style="margin-top:40px;color:#ccc;font-size:14px;line-height:1.7;">三年级总复习第一轮、四年级预习第一轮可免费体验；进入第二轮和后续地图需要开通。<br>更换设备、清理浏览器缓存后需要重新输入密码。</p>
     </div>`;
     if(document.body) document.body.insertAdjacentHTML('beforeend', html);
     else document.addEventListener('DOMContentLoaded', () => window.showPaywall(), {once:true});
@@ -142,6 +158,7 @@ setInterval(function(){
     localStorage.setItem('gameVipTime', String(Date.now() + 365 * 24 * 60 * 60 * 1000));
     localStorage.setItem('gamePaidUnlockV2','1');
     localStorage.removeItem('gameTrialExpiredLock');
+    localStorage.removeItem('gameFirstRoundFreeDone');
     if(typeof window.trackGameEvent==='function')window.trackGameEvent('unlock_success','one_year');
     alert('解锁成功！一年服务已开启，刷新后即可继续游戏。');
     location.reload();
@@ -281,7 +298,7 @@ window.trackGameEvent = function(action,label){
 document.addEventListener('DOMContentLoaded',function(){window.trackGameEvent('page_open','game_home')});
 </script>
 </head>
-<body><section class="start-guide" id="startGuide"><div class="start-guide-card"><div class="start-guide-logo">🚀</div><h1>月球英语救援</h1><div class="start-guide-sub">请在手机浏览器中打开游戏</div><div class="browser-guides"><div class="browser-guide android"><span class="browser-icon">🤖</span>安卓手机<small>建议使用 Edge 浏览器</small></div><div class="browser-guide ios"><span class="browser-icon">🍎</span>苹果手机<small>使用自带 Safari 浏览器</small></div></div><div class="start-guide-tip">首次录音时，请点击“允许使用麦克风”<br>微信内打开可能无法正常识别语音</div><div class="start-actions"><button class="start-game" id="startGame">开始游戏<small>只复习三年级上册 + 下册</small></button><button class="start-game preview" id="startPreview4">四年级预习<small>只练 PEP 四上单词和对话</small></button></div></div></section><div class="rotate-mask" id="rotateMask"><div class="rotate-card"><div class="rotate-phone">📱</div><div class="rotate-title">请横屏开始</div><div class="rotate-tip">请打开手机自动旋转，再把手机横过来。</div><button class="rotate-start" id="rotateStart">我已横屏，刷新画面</button><div class="rotate-mini">微信里请点右上角“…”并选择在浏览器打开</div></div></div><div class="game-shell"><main id="game"><canvas id="c"></canvas><canvas id="heroCanvas"></canvas>
+<body><section class="start-guide" id="startGuide"><div class="start-guide-card"><div class="start-guide-logo">🚀</div><h1>月球英语救援</h1><div class="start-guide-sub">请在手机浏览器中打开游戏</div><div class="browser-guides"><div class="browser-guide android"><span class="browser-icon">🤖</span>安卓手机<small>建议使用 Edge 浏览器</small></div><div class="browser-guide ios"><span class="browser-icon">🍎</span>苹果手机<small>使用自带 Safari 浏览器</small></div></div><div class="start-guide-tip">首次录音时，请点击“允许使用麦克风”<br>微信内打开可能无法正常识别语音</div><div class="start-actions"><button class="start-game" id="startGame">三年级总复习<small>复习三年级上册 + 下册</small></button><button class="start-game preview" id="startPreview4">四年级预习<small>只练 PEP 四上单词和对话</small></button></div></div></section><div class="rotate-mask" id="rotateMask"><div class="rotate-card"><div class="rotate-phone">📱</div><div class="rotate-title">请横屏开始</div><div class="rotate-tip">请打开手机自动旋转，再把手机横过来。</div><button class="rotate-start" id="rotateStart">我已横屏，刷新画面</button><div class="rotate-mini">微信里请点右上角“…”并选择在浏览器打开</div></div></div><div class="game-shell"><main id="game"><canvas id="c"></canvas><canvas id="heroCanvas"></canvas>
 <div class="hud"><div class="pill hp">氧气 <b id="hpText">5/5</b><div class="bar"><div class="fill" id="hpFill"></div></div></div><div class="pill">⭐ <span id="xp">0</span></div><div class="pill" id="weapon">👊 徒手</div><div class="pill">补给 <span id="refill">0/2</span></div><div class="pill">环节 <span id="chapter">1</span></div><div class="pill">等级 <span id="level">1</span></div><div class="pill stage" id="zone">地球轨道</div></div>
 <div class="tip" id="tip">跟着黄色箭头走，靠近发光门会自动出现单词</div>
 <div class="joy"><button class="u" data-dir="u">↑</button><button class="l" data-dir="l">←</button><button class="r" data-dir="r">→</button><button class="d" data-dir="d">↓</button></div><button class="action" id="action">一键返舱<br>🚀</button>
@@ -501,8 +518,8 @@ function currentJumpHeight(){if(jumpUntil<=Date.now())return 0;let p=1-(jumpUnti
 document.querySelector('#jump').onclick=()=>{if(busy||jumpUntil>Date.now())return;jumpUntil=Date.now()+650;tone(420,.08);let nearSecret=Math.hypot(S.x-1450,S.y-390)<115;if(nearSecret){if(Date.now()-lastSecretJump<1900)secretJumps++;else secretJumps=1;lastSecretJump=Date.now();if(secretJumps===1)toast('脚下传来奇怪的回声……再跳一次？');if(secretJumps>=2&&!secretOpened){secretOpened=true;setTimeout(openSecretDoor,680)}}};
 function openSecretDoor(){busy=true;let q=nextCourseQuestion('talk');card.innerHTML=`<span class="tag">🚪 隐藏火星门</span><h2>火星人出现了！</h2><div class="speech">👽 ${q.q}</div><div class="hint">选择正确暗号，火星人才会交出秘密奖励</div><div class="options">${q.options.map((x,i)=>`<button type="button" data-secret="${i}">${x}</button>`).join('')}</div><button type="button" class="secondary" id="secretListen">🔊 听暗号</button>`;modal.classList.add('show');bindReliableTap(card.querySelector('#secretListen'),()=>speak(q.q));card.querySelectorAll('[data-secret]').forEach(b=>bindReliableTap(b,()=>{if(+b.dataset.secret===q.a){S.xp+=30;save();ui();showMushroomReward()}else{b.classList.add('wrong');tone(140,.16);toast('暗号不对，再听一次')}}))}
 function showMushroomReward(){card.innerHTML=`<div class="stars">✨🍄✨</div><h2>获得星光蘑菇！</h2><p>火星人把蘑菇递给了宇航员。吃下后产生1秒无敌保护罩。</p><button type="button" class="primary" id="eatMushroom">吃掉蘑菇</button>`;bindReliableTap(card.querySelector('#eatMushroom'),()=>{shieldUntil=Date.now()+1000;invincible=Math.max(invincible,1000);modal.classList.remove('show');busy=false;tone(660,.12);setTimeout(()=>tone(880,.18),100);toast('🛡️ 星光保护罩启动：1秒无敌！')})}
-function completePreviewRound(){if(busy)return;busy=true;keys={};let next=PREVIEW_THEMES[((S.previewRound||0)+1)%PREVIEW_THEMES.length];card.innerHTML=`<div class="stars">⭐⭐⭐</div><h2>${previewTheme().short}完成！</h2><p>这一轮四上单词和对话已经练完。下一轮进入：<b>${next.short}</b>，场景会变化，继续跟读新的四上内容。</p><button type="button" class="primary" id="nextPreviewRound">进入${next.short}</button><button type="button" class="secondary" id="pausePreviewRound">先停在这里</button>`;modal.classList.add('show');bindReliableTap(card.querySelector('#nextPreviewRound'),()=>{prepareModeStart('preview4',{next:true});resumeWorld('已进入'+previewTheme().short+'，继续四上预习')});bindReliableTap(card.querySelector('#pausePreviewRound'),()=>resumeWorld('已停在四年级预习终点'))}
-function completeReviewRound(){if(busy)return;busy=true;keys={};let next=REVIEW_ROUNDS[((S.reviewRound||0)+1)%REVIEW_ROUNDS.length];card.innerHTML=`<div class="stars">⭐⭐⭐</div><h2>三年级复习一轮完成！</h2><p>下一轮进入：<b>${next}</b>。怪物位置、怪物颜色和宇航员外观都会变化，继续复习三上三下。</p><button type="button" class="primary" id="nextReviewRound">进入下一轮</button><button type="button" class="secondary" id="pauseReviewRound">先停在这里</button>`;modal.classList.add('show');bindReliableTap(card.querySelector('#nextReviewRound'),()=>{prepareModeStart('review3',{next:true});resumeWorld('已进入'+REVIEW_ROUNDS[S.reviewRound||0])});bindReliableTap(card.querySelector('#pauseReviewRound'),()=>resumeWorld('已停在三年级复习终点'))}
+function completePreviewRound(){if(busy)return;busy=true;keys={};let next=PREVIEW_THEMES[((S.previewRound||0)+1)%PREVIEW_THEMES.length];card.innerHTML=`<div class="stars">⭐⭐⭐</div><h2>${previewTheme().short}完成！</h2><p>这一轮四上单词和对话已经练完。下一轮进入：<b>${next.short}</b>，场景会变化，继续跟读新的四上内容。</p><button type="button" class="primary" id="nextPreviewRound">进入${next.short}</button><button type="button" class="secondary" id="pausePreviewRound">先停在这里</button>`;modal.classList.add('show');bindReliableTap(card.querySelector('#nextPreviewRound'),()=>{if(window.requireFullAccess&&!window.requireFullAccess('preview_next_round'))return;prepareModeStart('preview4',{next:true});resumeWorld('已进入'+previewTheme().short+'，继续四上预习')});bindReliableTap(card.querySelector('#pausePreviewRound'),()=>resumeWorld('已停在四年级预习终点'))}
+function completeReviewRound(){if(busy)return;busy=true;keys={};let next=REVIEW_ROUNDS[((S.reviewRound||0)+1)%REVIEW_ROUNDS.length];card.innerHTML=`<div class="stars">⭐⭐⭐</div><h2>免费体验关卡完成！</h2><p>孩子已经完成第一关月球救援。下一轮进入：<b>${next}</b>，会解锁更多地图、怪物和三上三下复习内容。</p><button type="button" class="primary" id="nextReviewRound">解锁后进入下一轮</button><button type="button" class="secondary" id="pauseReviewRound">先停在这里</button>`;modal.classList.add('show');try{localStorage.setItem('gameFirstRoundFreeDone','1')}catch(e){}bindReliableTap(card.querySelector('#nextReviewRound'),()=>{if(window.requireFullAccess&&!window.requireFullAccess('review_next_round'))return;prepareModeStart('review3',{next:true});resumeWorld('已进入'+REVIEW_ROUNDS[S.reviewRound||0])});bindReliableTap(card.querySelector('#pauseReviewRound'),()=>resumeWorld('已停在免费体验终点'))}
 function tone(freq,dur=.12,vol=.045){if(!audio)return;let o=audio.createOscillator(),g=audio.createGain();o.type='square';o.frequency.value=freq;g.gain.setValueAtTime(vol,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+dur);o.connect(g).connect(audio.destination);o.start();o.stop(audio.currentTime+dur)}
 function startMusic(){audio=audio||new (window.AudioContext||window.webkitAudioContext)();audio.resume();let notes=[262,330,392,523,392,330,294,349,440,587,440,349,330,392,494,659];let i=0;musicTimer=setInterval(()=>{if(musicOn){tone(notes[i++%notes.length],.17,.025);if(i%4===0)setTimeout(()=>tone(notes[(i+4)%notes.length]/2,.1,.018),80)}},190)}
 document.querySelector('#music').onclick=()=>{musicOn=!musicOn;if(musicOn&&!musicTimer)startMusic();document.querySelector('#music').textContent='♫ 太空音乐：'+(musicOn?'开':'关');toast(musicOn?'太空行动音乐已开启':'音乐已关闭')};
